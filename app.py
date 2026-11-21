@@ -245,6 +245,8 @@ class AutoVideoStudioApp(tk.Tk):
         self.current_frame_idx = 0
         self.is_rendering = False
         self.has_audio_loaded = False
+        self.play_start_time = 0.0
+        self.play_start_frame = 0
 
         self.create_widgets()
         
@@ -591,6 +593,8 @@ class AutoVideoStudioApp(tk.Tk):
             return
         frame_num = max(0, min(self.video_total_frames - 1, frame_num))
         self.current_frame_idx = frame_num
+        self.play_start_frame = frame_num
+        self.play_start_time = time.perf_counter()
         self.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
         ret, frame = self.cap.read()
         if ret:
@@ -636,6 +640,8 @@ class AutoVideoStudioApp(tk.Tk):
         else:
             self.is_playing = True
             self.btn_play.config(text="⏸ PAUSE", bg="#10B981")
+            self.play_start_frame = self.current_frame_idx
+            self.play_start_time = time.perf_counter()
             if HAS_PYGAME_AUDIO and self.has_audio_loaded:
                 cur_pos = self.current_frame_idx / self.video_fps
                 pygame.mixer.music.play(start=cur_pos)
@@ -645,12 +651,32 @@ class AutoVideoStudioApp(tk.Tk):
         if not self.is_playing or self.cap is None:
             return
         
+        # Calculate exactly which frame should be shown according to wall-clock time
+        elapsed = time.perf_counter() - self.play_start_time
+        target_frame = int(self.play_start_frame + elapsed * self.video_fps)
+        
+        if target_frame >= self.video_total_frames:
+            self.is_playing = False
+            self.btn_play.config(text="▶ PLAY", bg="#F59E0B")
+            if HAS_PYGAME_AUDIO and self.has_audio_loaded:
+                pygame.mixer.music.stop()
+            self.seek_frame(0)
+            return
+
+        # If we need to seek forward because of frame processing overhead
+        if abs(target_frame - self.current_frame_idx) > 1:
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
+        
         ret, frame = self.cap.read()
         if ret:
-            self.current_frame_idx += 1
+            self.current_frame_idx = target_frame
             self.display_frame(frame)
             self.update_player_ui()
-            delay_ms = int(1000 / self.video_fps)
+            
+            # Dynamically compute remaining milliseconds until next frame
+            next_frame_time = (target_frame + 1 - self.play_start_frame) / self.video_fps
+            remaining_sec = next_frame_time - (time.perf_counter() - self.play_start_time)
+            delay_ms = max(1, int(remaining_sec * 1000))
             self.after(delay_ms, self.play_loop)
         else:
             self.is_playing = False
