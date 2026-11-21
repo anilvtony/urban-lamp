@@ -83,38 +83,70 @@ def advance_cycle_style():
         json.dump(state, f, indent=2)
     return style, next_idx
 
+from badge_catalog_manager import render_single_badge_to_disk
+
+DEFAULT_BADGE_MAP = {
+    "1": [("p2_b1.png", "Welcome Back! 👋", "#E8B931", "#1B2A4A", "#1B2A4A", 46, False)],
+    "2": [("p2_b2.png", "ఆకలితో ఉండటమే Fasting ఆ?", "#FAF6F0", "#1B2A4A", "#1B2A4A", 44, False)],
+    "3": [("p2_b3.png", "Digestive Systemకి Rest ఏదీ?", "#E8B931", "#1B2A4A", "#1B2A4A", 44, False)],
+    "4": [("p2_b4.png", "16 HRS = BACKUP SYSTEM ON! ⚡", "#FAF6F0", "#C84B28", "#C84B28", 42, False)],
+    "5": [("p2_b5.png", "తినడం ఆపితే లోపల ఏం జరుగుతుంది?", "#E8B931", "#1B2A4A", "#1B2A4A", 42, False)],
+    "6": [("p2_b6.png", "Simpleగా Break Down చేద్దాం!", "#5B8C5A", "#1B2A4A", "#1B2A4A", 44, False)],
+    "7": [("p2_b7.png", "Glucose = Direct Phone Charger", "#FAF6F0", "#1B2A4A", "#1B2A4A", 42, False)],
+    "8_1": [("p2_b8_1.png", "INSULIN ⬇", "#FAF6F0", "#1B2A4A", "#1B2A4A", 44, False)],
+    "8_2": [("p2_b8_2.png", "FAT CELLS OPEN 🔑", "#E8B931", "#1B2A4A", "#1B2A4A", 44, False)],
+    "9": [("p2_b9.png", "Insulin Down = Fat Unlock Signal", "#FAF6F0", "#1B2A4A", "#1B2A4A", 42, False)],
+    "10": [("p2_b10.png", "16 Hours: Autophagy Cleaning!", "#E8B931", "#C84B28", "#1B2A4A", 42, False)],
+    "11_1": [("p2_b11_1.png", "GLUCOSE = CASH 💵", "#5B8C5A", "#1B2A4A", "#1B2A4A", 44, False)],
+    "11_2": [("p2_b11_2.png", "FAT = BANK FD 🏦", "#E8B931", "#1B2A4A", "#1B2A4A", 44, False)],
+    "12": [("p2_b12.png", "నిద్రలోనూ చిన్న Fasting జరుగుతుంది...", "#FAF6F0", "#1B2A4A", "#1B2A4A", 42, False)],
+    "13_1": [("p2_b13_1.png", "BODY WEAK అవ్వదు! 💪", "#E8B931", "#1B2A4A", "#1B2A4A", 44, False)],
+    "13_2": [("p2_b13_2.png", "FREE CLEANING BREAK!", "#E8B931", "#C84B28", "#1B2A4A", 46, False)],
+    "14": [("p2_b14.png", "Subscribe & Comment Below!", "#FAF6F0", "#1B2A4A", "#1B2A4A", 44, False)]
+}
+
 def load_manual_positions():
     default_positions = {
-        "1": 95,
-        "2": 130,
-        "3": 170,
-        "4": 90,
-        "5": 120,
-        "6": 1600,
-        "7": 120,
-        "8_1": 110,
-        "8_2": 250,
-        "9": 170,
-        "10": 1600,
-        "11_1": 120,
-        "11_2": 260,
-        "12": 160,
-        "13_1": 110,
-        "13_2": 250,
-        "14": 1600
+        "1": {"x": 540, "y": 95, "scale": 1.0, "text": "Welcome Back! 👋"},
+        "2": {"x": 540, "y": 130, "scale": 1.0, "text": "ఆకలితో ఉండటమే Fasting ఆ?"},
+        "3": {"x": 540, "y": 170, "scale": 1.0, "text": "Digestive Systemకి Rest ఏదీ?"},
+        "4": {"x": 540, "y": 90, "scale": 1.0, "text": "16 HRS = BACKUP SYSTEM ON! ⚡"},
+        "5": {"x": 540, "y": 120, "scale": 1.0, "text": "తినడం ఆపితే లోపల ఏం జరుగుతుంది?"},
+        "6": {"x": 540, "y": 1600, "scale": 1.0, "text": "Simpleగా Break Down చేద్దాం!"},
+        "7": {"x": 540, "y": 120, "scale": 1.0, "text": "Glucose = Direct Phone Charger"},
+        "8_1": {"x": 540, "y": 110, "scale": 1.0, "text": "INSULIN ⬇"},
+        "8_2": {"x": 540, "y": 250, "scale": 1.0, "text": "FAT CELLS OPEN 🔑"},
+        "9": {"x": 540, "y": 170, "scale": 1.0, "text": "Insulin Down = Fat Unlock Signal"},
+        "10": {"x": 540, "y": 1600, "scale": 1.0, "text": "16 Hours: Autophagy Cleaning!"},
+        "11_1": {"x": 540, "y": 120, "scale": 1.0, "text": "GLUCOSE = CASH 💵"},
+        "11_2": {"x": 540, "y": 260, "scale": 1.0, "text": "FAT = BANK FD 🏦"},
+        "12": {"x": 540, "y": 160, "scale": 1.0, "text": "నిద్రలోనూ చిన్న Fasting జరుగుతుంది..."},
+        "13_1": {"x": 540, "y": 110, "scale": 1.0, "text": "BODY WEAK అవ్వదు! 💪"},
+        "13_2": {"x": 540, "y": 250, "scale": 1.0, "text": "FREE CLEANING BREAK!"},
+        "14": {"x": 540, "y": 1600, "scale": 1.0, "text": "Subscribe & Comment Below!"}
     }
     if os.path.exists(POSITIONS_FILE):
         try:
             with open(POSITIONS_FILE, "r") as f:
                 saved = json.load(f)
-                default_positions.update(saved)
+                for k, v in saved.items():
+                    if isinstance(v, int):
+                        if k in default_positions:
+                            default_positions[k]["y"] = v
+                        else:
+                            default_positions[k] = {"x": 540, "y": v, "scale": 1.0, "text": ""}
+                    elif isinstance(v, dict):
+                        if k in default_positions:
+                            default_positions[k].update(v)
+                        else:
+                            default_positions[k] = v
         except Exception:
             pass
     return default_positions
 
 def save_manual_positions(positions_dict):
-    with open(POSITIONS_FILE, "w") as f:
-        json.dump(positions_dict, f, indent=2)
+    with open(POSITIONS_FILE, "w", encoding="utf-8") as f:
+        json.dump(positions_dict, f, indent=2, ensure_ascii=False)
 
 def read_image_utf8(path):
     pil_im = Image.open(path).convert('RGB')
@@ -197,9 +229,13 @@ class AutoVideoStudioApp(tk.Tk):
         self.anim_mode_var = tk.StringVar(value=f"Cycle Style Per Video (Next: {next_s})")
         self.enable_anim_var = tk.BooleanVar(value=True)
 
-        # Badge Positions
+        # Badge Positions and Editing
         self.badge_positions = load_manual_positions()
         self.selected_scene_var = tk.StringVar(value="Scene 4")
+        self.x_pos_var = tk.IntVar(value=540)
+        self.y_pos_var = tk.IntVar(value=90)
+        self.scale_var = tk.DoubleVar(value=1.0)
+        self.text_edit_var = tk.StringVar(value="16 HRS = BACKUP SYSTEM ON! ⚡")
 
         # Video Player state
         self.cap = None
@@ -245,33 +281,59 @@ class AutoVideoStudioApp(tk.Tk):
         self.add_browse_row(cfg_frame, "🎵 Audio Folder:", self.aud_dir_var, self.browse_aud_dir, 2)
         self.add_browse_row(cfg_frame, "💾 Export Video:", self.out_video_var, self.browse_out_video, 3)
 
-        # --- LEFT 2: Manual Badge Repositioning Section ---
-        pos_box = tk.LabelFrame(left_frame, text=" 📍 Manual Badge Repositioning (Zero Background Blocking) ", bg="#1E293B", fg="#10B981", font=("Segoe UI", 10, "bold"), padx=10, pady=6)
+        # --- LEFT 2: Manual Badge Repositioning, Text Editing & Size Control Section ---
+        pos_box = tk.LabelFrame(left_frame, text=" 📍 Badge Editor (X/Y Movement, Size & Text Editing) ", bg="#1E293B", fg="#10B981", font=("Segoe UI", 10, "bold"), padx=10, pady=6)
         pos_box.pack(fill=tk.X, pady=(0, 6))
 
-        pos_ctrl = tk.Frame(pos_box, bg="#1E293B")
-        pos_ctrl.pack(fill=tk.X, pady=2)
-
-        lbl_sc = tk.Label(pos_ctrl, text="Select Scene:", bg="#1E293B", fg="white", font=("Segoe UI", 9))
+        # Row 1: Scene Selector & Sub-badge (if multi)
+        row1 = tk.Frame(pos_box, bg="#1E293B")
+        row1.pack(fill=tk.X, pady=2)
+        lbl_sc = tk.Label(row1, text="Scene:", bg="#1E293B", fg="white", font=("Segoe UI", 9, "bold"))
         lbl_sc.pack(side=tk.LEFT, padx=(0, 4))
-
         scenes_list = [f"Scene {i}" for i in range(1, 15)]
-        self.cmb_scene = ttk.Combobox(pos_ctrl, values=scenes_list, textvariable=self.selected_scene_var, state="readonly", width=12)
+        self.cmb_scene = ttk.Combobox(row1, values=scenes_list, textvariable=self.selected_scene_var, state="readonly", width=10)
         self.cmb_scene.pack(side=tk.LEFT, padx=4)
         self.cmb_scene.bind("<<ComboboxSelected>>", self.on_scene_selected)
 
-        lbl_y = tk.Label(pos_ctrl, text="Y Position (px):", bg="#1E293B", fg="white", font=("Segoe UI", 9))
-        lbl_y.pack(side=tk.LEFT, padx=(10, 4))
+        # Editable Text Field
+        lbl_txt = tk.Label(row1, text="Text:", bg="#1E293B", fg="white", font=("Segoe UI", 9, "bold"))
+        lbl_txt.pack(side=tk.LEFT, padx=(10, 4))
+        self.ent_text = ttk.Entry(row1, textvariable=self.text_edit_var, width=28)
+        self.ent_text.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
+        self.ent_text.bind("<KeyRelease>", self.on_text_edited)
 
-        self.y_pos_var = tk.IntVar(value=90)
-        self.y_slider = ttk.Scale(pos_ctrl, from_=50, to=1750, variable=self.y_pos_var, command=self.on_y_slider_moved)
+        # Row 2: Y-Axis Movement Slider
+        row_y = tk.Frame(pos_box, bg="#1E293B")
+        row_y.pack(fill=tk.X, pady=2)
+        lbl_y = tk.Label(row_y, text="Y-Axis (Up/Down):", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=16, anchor=tk.W)
+        lbl_y.pack(side=tk.LEFT)
+        self.y_slider = ttk.Scale(row_y, from_=50, to=1750, variable=self.y_pos_var, command=self.on_y_slider_moved)
         self.y_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
-
-        self.lbl_y_val = tk.Label(pos_ctrl, text="90px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 10, "bold"), width=7)
+        self.lbl_y_val = tk.Label(row_y, text="90px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 9, "bold"), width=6)
         self.lbl_y_val.pack(side=tk.LEFT)
 
-        btn_apply_pos = tk.Button(pos_box, text="💾 Save Badge Position for Scene", bg="#059669", fg="white", font=("Segoe UI", 8, "bold"), relief=tk.FLAT, padx=8, pady=2, command=self.save_current_position)
-        btn_apply_pos.pack(anchor=tk.E, pady=(4, 2))
+        # Row 3: X-Axis Movement Slider
+        row_x = tk.Frame(pos_box, bg="#1E293B")
+        row_x.pack(fill=tk.X, pady=2)
+        lbl_x = tk.Label(row_x, text="X-Axis (Left/Right):", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=16, anchor=tk.W)
+        lbl_x.pack(side=tk.LEFT)
+        self.x_slider = ttk.Scale(row_x, from_=100, to=980, variable=self.x_pos_var, command=self.on_x_slider_moved)
+        self.x_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
+        self.lbl_x_val = tk.Label(row_x, text="540px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 9, "bold"), width=6)
+        self.lbl_x_val.pack(side=tk.LEFT)
+
+        # Row 4: Size / Scale Slider & Save Button
+        row4 = tk.Frame(pos_box, bg="#1E293B")
+        row4.pack(fill=tk.X, pady=2)
+        lbl_sz = tk.Label(row4, text="Size (Decrease/Scale):", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=16, anchor=tk.W)
+        lbl_sz.pack(side=tk.LEFT)
+        self.scale_slider = ttk.Scale(row4, from_=0.4, to=1.4, variable=self.scale_var, command=self.on_scale_slider_moved)
+        self.scale_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
+        self.lbl_scale_val = tk.Label(row4, text="100%", bg="#1E293B", fg="#F59E0B", font=("Consolas", 9, "bold"), width=6)
+        self.lbl_scale_val.pack(side=tk.LEFT)
+
+        btn_apply_pos = tk.Button(row4, text="💾 Save Changes for Scene", bg="#059669", fg="white", font=("Segoe UI", 8, "bold"), relief=tk.FLAT, padx=8, pady=2, command=self.save_current_position)
+        btn_apply_pos.pack(side=tk.LEFT, padx=(6, 0))
 
         # --- LEFT 3: 25 Animation Modes ---
         anim_box = tk.LabelFrame(left_frame, text=" 25 Animation Styles Engine ", bg="#1E293B", fg="#38BDF8", font=("Segoe UI", 10, "bold"), padx=10, pady=6)
@@ -382,13 +444,30 @@ class AutoVideoStudioApp(tk.Tk):
         f = filedialog.asksaveasfilename(initialdir=WORKSPACE, defaultextension=".mp4", filetypes=[("MP4 Video", "*.mp4")])
         if f: self.out_video_var.set(f)
 
-    # --- BADGE REPOSITIONING LOGIC ---
+    # --- BADGE REPOSITIONING & EDITING LOGIC ---
     def on_scene_selected(self, event=None):
         sc_str = self.selected_scene_var.get()
         sc_num = sc_str.replace("Scene ", "").strip()
-        y_val = self.badge_positions.get(sc_num, 90)
-        self.y_pos_var.set(y_val)
-        self.lbl_y_val.config(text=f"{y_val}px")
+        data = self.badge_positions.get(sc_num, {"x": 540, "y": 90, "scale": 1.0, "text": ""})
+        if isinstance(data, int):
+            data = {"x": 540, "y": data, "scale": 1.0, "text": ""}
+        
+        self.y_pos_var.set(data.get("y", 90))
+        self.lbl_y_val.config(text=f"{data.get('y', 90)}px")
+        
+        self.x_pos_var.set(data.get("x", 540))
+        self.lbl_x_val.config(text=f"{data.get('x', 540)}px")
+        
+        sc_val = data.get("scale", 1.0)
+        self.scale_var.set(sc_val)
+        self.lbl_scale_val.config(text=f"{int(sc_val*100)}%")
+        
+        # Populate text
+        cur_text = data.get("text", "")
+        if not cur_text and sc_num in DEFAULT_BADGE_MAP:
+            cur_text = DEFAULT_BADGE_MAP[sc_num][0][1]
+        self.text_edit_var.set(cur_text)
+        
         self.preview_repositioned_badge()
 
     def on_y_slider_moved(self, val):
@@ -396,14 +475,43 @@ class AutoVideoStudioApp(tk.Tk):
         self.lbl_y_val.config(text=f"{y_val}px")
         self.preview_repositioned_badge()
 
+    def on_x_slider_moved(self, val):
+        x_val = int(float(val))
+        self.lbl_x_val.config(text=f"{x_val}px")
+        self.preview_repositioned_badge()
+
+    def on_scale_slider_moved(self, val):
+        s_val = round(float(val), 2)
+        self.lbl_scale_val.config(text=f"{int(s_val*100)}%")
+        self.preview_repositioned_badge()
+
+    def on_text_edited(self, event=None):
+        self.preview_repositioned_badge()
+
     def save_current_position(self):
         sc_str = self.selected_scene_var.get()
         sc_num = sc_str.replace("Scene ", "").strip()
+        new_x = self.x_pos_var.get()
         new_y = self.y_pos_var.get()
-        self.badge_positions[sc_num] = new_y
+        new_scale = round(self.scale_var.get(), 2)
+        new_text = self.text_edit_var.get().strip()
+
+        # Update disk badge PNG if text changed
+        if sc_num in DEFAULT_BADGE_MAP and new_text:
+            bname, orig_txt, bg, tc, bc, fs, st = DEFAULT_BADGE_MAP[sc_num][0]
+            if new_text != orig_txt:
+                self.log(f"Re-rendering badge image for {sc_str} with text: '{new_text}'")
+                render_single_badge_to_disk(new_text, bg, tc, bc, fs, st, bname, overwrite=True)
+
+        self.badge_positions[sc_num] = {
+            "x": new_x,
+            "y": new_y,
+            "scale": new_scale,
+            "text": new_text
+        }
         save_manual_positions(self.badge_positions)
-        self.log(f"Saved position for {sc_str}: Y = {new_y}px")
-        messagebox.showinfo("Position Saved", f"{sc_str} badge position set to {new_y}px.\nWill be used on next render!")
+        self.log(f"Saved settings for {sc_str}: X={new_x}px, Y={new_y}px, Scale={int(new_scale*100)}%, Text='{new_text}'")
+        messagebox.showinfo("Settings Saved", f"{sc_str} settings saved!\nX: {new_x}px | Y: {new_y}px | Scale: {int(new_scale*100)}%\nText: '{new_text}'\nWill be used on next render!")
 
     def preview_repositioned_badge(self):
         sc_str = self.selected_scene_var.get()
@@ -419,13 +527,22 @@ class AutoVideoStudioApp(tk.Tk):
         nw, nh = int(w * scale), int(h * scale)
         im_res = im.resize((nw, nh), Image.LANCZOS).crop(((nw-WIDTH)//2, (nh-HEIGHT)//2, (nw-WIDTH)//2+WIDTH, (nh-HEIGHT)//2+HEIGHT))
 
-        # Load badge
+        # Check badge
         bname = f"p2_b{sc_num}.png"
         bpath = os.path.join(BADGE_DIR, bname)
         if os.path.exists(bpath):
             b_im = Image.open(bpath).convert('RGBA')
+            
+            # Apply scale if modified
+            sc_factor = self.scale_var.get()
+            if abs(sc_factor - 1.0) > 0.02:
+                bw = max(10, int(b_im.width * sc_factor))
+                bh = max(10, int(b_im.height * sc_factor))
+                b_im = b_im.resize((bw, bh), Image.LANCZOS)
+
+            x_cur = self.x_pos_var.get()
             y_cur = self.y_pos_var.get()
-            x = (WIDTH - b_im.width) // 2
+            x = x_cur - b_im.width // 2
             y = y_cur - b_im.height // 2
             im_res.paste(b_im, (x, y), b_im)
 
@@ -654,20 +771,20 @@ class AutoVideoStudioApp(tk.Tk):
             # Scenes badge configuration mapping with loaded manual positions
             pos = self.badge_positions
             scenes_cfg = [
-                {"badges": [("p2_b1.png", pos.get("1", 95), 0.2, 0.25)]},
-                {"badges": [("p2_b2.png", pos.get("2", 130), 0.2, 0.25)]},
-                {"badges": [("p2_b3.png", pos.get("3", 170), 0.2, 0.25)]},
-                {"badges": [("p2_b4.png", pos.get("4", 90), 0.2, 0.25)]},
-                {"badges": [("p2_b5.png", pos.get("5", 120), 0.2, 0.25)]},
-                {"badges": [("p2_b6.png", pos.get("6", 1600), 0.2, 0.25)]},
-                {"badges": [("p2_b7.png", pos.get("7", 120), 0.2, 0.25)]},
-                {"badges": [("p2_b8_1.png", pos.get("8_1", 110), 0.2, 0.25), ("p2_b8_2.png", pos.get("8_2", 250), 1.5, 0.25)]},
-                {"badges": [("p2_b9.png", pos.get("9", 170), 0.2, 0.25)]},
-                {"badges": [("p2_b10.png", pos.get("10", 1600), 0.2, 0.25)]},
-                {"badges": [("p2_b11_1.png", pos.get("11_1", 120), 0.2, 0.25), ("p2_b11_2.png", pos.get("11_2", 260), 1.2, 0.25)]},
-                {"badges": [("p2_b12.png", pos.get("12", 160), 0.2, 0.25)]},
-                {"badges": [("p2_b13_1.png", pos.get("13_1", 110), 0.2, 0.25), ("p2_b13_2.png", pos.get("13_2", 250), 1.0, 0.25)]},
-                {"badges": [("p2_b14.png", pos.get("14", 1600), 0.2, 0.25)]},
+                {"badges": [("p2_b1.png", pos.get("1", {"x": 540, "y": 95, "scale": 1.0}), 0.2, 0.25)]},
+                {"badges": [("p2_b2.png", pos.get("2", {"x": 540, "y": 130, "scale": 1.0}), 0.2, 0.25)]},
+                {"badges": [("p2_b3.png", pos.get("3", {"x": 540, "y": 170, "scale": 1.0}), 0.2, 0.25)]},
+                {"badges": [("p2_b4.png", pos.get("4", {"x": 540, "y": 90, "scale": 1.0}), 0.2, 0.25)]},
+                {"badges": [("p2_b5.png", pos.get("5", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25)]},
+                {"badges": [("p2_b6.png", pos.get("6", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
+                {"badges": [("p2_b7.png", pos.get("7", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25)]},
+                {"badges": [("p2_b8_1.png", pos.get("8_1", {"x": 540, "y": 110, "scale": 1.0}), 0.2, 0.25), ("p2_b8_2.png", pos.get("8_2", {"x": 540, "y": 250, "scale": 1.0}), 1.5, 0.25)]},
+                {"badges": [("p2_b9.png", pos.get("9", {"x": 540, "y": 170, "scale": 1.0}), 0.2, 0.25)]},
+                {"badges": [("p2_b10.png", pos.get("10", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
+                {"badges": [("p2_b11_1.png", pos.get("11_1", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25), ("p2_b11_2.png", pos.get("11_2", {"x": 540, "y": 260, "scale": 1.0}), 1.2, 0.25)]},
+                {"badges": [("p2_b12.png", pos.get("12", {"x": 540, "y": 160, "scale": 1.0}), 0.2, 0.25)]},
+                {"badges": [("p2_b13_1.png", pos.get("13_1", {"x": 540, "y": 110, "scale": 1.0}), 0.2, 0.25), ("p2_b13_2.png", pos.get("13_2", {"x": 540, "y": 250, "scale": 1.0}), 1.0, 0.25)]},
+                {"badges": [("p2_b14.png", pos.get("14", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
             ]
 
             ffmpeg_cmd = [
@@ -703,14 +820,21 @@ class AutoVideoStudioApp(tk.Tk):
 
                 cfg = scenes_cfg[s_idx] if s_idx < len(scenes_cfg) else {"badges": []}
                 loaded_badges = []
-                for bname, cy, ent_delay, ex_lead in cfg["badges"]:
+                for bname, bcfg, ent_delay, ex_lead in cfg["badges"]:
                     bpath = os.path.join(BADGE_DIR, bname)
                     if os.path.exists(bpath):
                         b_rgba = cv2.imread(bpath, cv2.IMREAD_UNCHANGED)
+                        sc_val = bcfg.get("scale", 1.0)
+                        if abs(sc_val - 1.0) > 0.01:
+                            new_w = max(10, int(b_rgba.shape[1] * sc_val))
+                            new_h = max(10, int(b_rgba.shape[0] * sc_val))
+                            b_rgba = cv2.resize(b_rgba, (new_w, new_h), interpolation=cv2.INTER_LANCZOS4)
+
                         loaded_badges.append({
                             "bgr": b_rgba[:, :, :3],
                             "alpha": (b_rgba[:, :, 3].astype(np.float32) / 255.0),
-                            "target_y": cy,
+                            "target_x": bcfg.get("x", 540),
+                            "target_y": bcfg.get("y", 90),
                             "t_start": ent_delay,
                             "t_end": max(dur - ex_lead, ent_delay + 0.5)
                         })
@@ -729,6 +853,7 @@ class AutoVideoStudioApp(tk.Tk):
                     for b in loaded_badges:
                         b_bgr = b["bgr"]
                         b_alpha = b["alpha"]
+                        target_x = b["target_x"]
                         target_y = b["target_y"]
                         t_start = b["t_start"]
                         t_end = b["t_end"]
@@ -744,7 +869,7 @@ class AutoVideoStudioApp(tk.Tk):
 
                         stamp_badge_final(
                             frame_bgr, draw_bgr, draw_alpha,
-                            x_center=WIDTH // 2, y_center=target_y,
+                            x_center=target_x, y_center=target_y,
                             dx=dx, dy=dy, opacity=opacity,
                             width=WIDTH, height=HEIGHT
                         )

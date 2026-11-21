@@ -72,7 +72,7 @@ UNIVERSAL_LIBRARY = [
     ("COMMENT YOUR DOUBTS 💬", "#FFF8E7", "#1B2A4A", "#1B2A4A", 46, False),
 ]
 
-def render_single_badge_to_disk(text, bg="#F4C430", txt_col="#1B2A4A", border_col="#1B2A4A", fsize=46, strike=False, out_filename=None):
+def render_single_badge_to_disk(text, bg="#F4C430", txt_col="#1B2A4A", border_col="#1B2A4A", fsize=46, strike=False, out_filename=None, overwrite=False):
     if out_filename is None:
         # Create unique filename from text
         safe_name = re.sub(r'[^a-zA-Z0-9]', '_', text)[:25].strip('_')
@@ -80,8 +80,8 @@ def render_single_badge_to_disk(text, bg="#F4C430", txt_col="#1B2A4A", border_co
         out_filename = f"b_{safe_name}_{h}.png"
         
     out_path = os.path.join(BADGE_DIR, out_filename)
-    if os.path.exists(out_path):
-        return out_path  # Already exists locally, never re-generate!
+    if os.path.exists(out_path) and not overwrite:
+        return out_path  # Already exists locally, never re-generate unless forced
 
     st_style = 'text-decoration: line-through; text-decoration-color: #C84B28; text-decoration-thickness: 5px;' if strike else ''
     html_content = f"""<!DOCTYPE html>

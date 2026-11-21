@@ -26,29 +26,37 @@ POSITIONS_FILE = os.path.join(WORKSPACE, "manual_badge_positions.json")
 
 def load_manual_positions():
     default_positions = {
-        "1": 95,
-        "2": 130,
-        "3": 170,
-        "4": 90,
-        "5": 120,
-        "6": 1600,
-        "7": 120,
-        "8_1": 110,
-        "8_2": 250,
-        "9": 170,
-        "10": 1600,
-        "11_1": 120,
-        "11_2": 260,
-        "12": 160,
-        "13_1": 110,
-        "13_2": 250,
-        "14": 1600
+        "1": {"x": 540, "y": 95, "scale": 1.0},
+        "2": {"x": 540, "y": 130, "scale": 1.0},
+        "3": {"x": 540, "y": 170, "scale": 1.0},
+        "4": {"x": 540, "y": 90, "scale": 1.0},
+        "5": {"x": 540, "y": 120, "scale": 1.0},
+        "6": {"x": 540, "y": 1600, "scale": 1.0},
+        "7": {"x": 540, "y": 120, "scale": 1.0},
+        "8_1": {"x": 540, "y": 110, "scale": 1.0},
+        "8_2": {"x": 540, "y": 250, "scale": 1.0},
+        "9": {"x": 540, "y": 170, "scale": 1.0},
+        "10": {"x": 540, "y": 1600, "scale": 1.0},
+        "11_1": {"x": 540, "y": 120, "scale": 1.0},
+        "11_2": {"x": 540, "y": 260, "scale": 1.0},
+        "12": {"x": 540, "y": 160, "scale": 1.0},
+        "13_1": {"x": 540, "y": 110, "scale": 1.0},
+        "13_2": {"x": 540, "y": 250, "scale": 1.0},
+        "14": {"x": 540, "y": 1600, "scale": 1.0}
     }
     if os.path.exists(POSITIONS_FILE):
         try:
             with open(POSITIONS_FILE, "r") as f:
                 saved = json.load(f)
-                default_positions.update(saved)
+                for k, v in saved.items():
+                    if isinstance(v, int):
+                        default_positions[k] = {"x": 540, "y": v, "scale": 1.0}
+                    elif isinstance(v, dict):
+                        default_positions[k] = {
+                            "x": v.get("x", 540),
+                            "y": v.get("y", 90),
+                            "scale": v.get("scale", 1.0)
+                        }
         except Exception:
             pass
     return default_positions
@@ -153,22 +161,22 @@ def main():
     
     pos = load_manual_positions()
     # Configure scenes and badges positioned strictly on clean cream / negative background
-    # (badge_name, y_center, enter_delay, exit_lead_time)
+    # (badge_name, cfg_dict, enter_delay, exit_lead_time)
     scenes_cfg = [
-        {"badges": [("p2_b1.png", pos.get("1", 95), 0.2, 0.25)]},
-        {"badges": [("p2_b2.png", pos.get("2", 130), 0.2, 0.25)]},
-        {"badges": [("p2_b3.png", pos.get("3", 170), 0.2, 0.25)]},
-        {"badges": [("p2_b4.png", pos.get("4", 90), 0.2, 0.25)]},
-        {"badges": [("p2_b5.png", pos.get("5", 120), 0.2, 0.25)]},
-        {"badges": [("p2_b6.png", pos.get("6", 1600), 0.2, 0.25)]},
-        {"badges": [("p2_b7.png", pos.get("7", 120), 0.2, 0.25)]},
-        {"badges": [("p2_b8_1.png", pos.get("8_1", 110), 0.2, 0.25), ("p2_b8_2.png", pos.get("8_2", 250), 1.5, 0.25)]},
-        {"badges": [("p2_b9.png", pos.get("9", 170), 0.2, 0.25)]},
-        {"badges": [("p2_b10.png", pos.get("10", 1600), 0.2, 0.25)]},
-        {"badges": [("p2_b11_1.png", pos.get("11_1", 120), 0.2, 0.25), ("p2_b11_2.png", pos.get("11_2", 260), 1.2, 0.25)]},
-        {"badges": [("p2_b12.png", pos.get("12", 160), 0.2, 0.25)]},
-        {"badges": [("p2_b13_1.png", pos.get("13_1", 110), 0.2, 0.25), ("p2_b13_2.png", pos.get("13_2", 250), 1.0, 0.25)]},
-        {"badges": [("p2_b14.png", pos.get("14", 1600), 0.2, 0.25)]},
+        {"badges": [("p2_b1.png", pos.get("1", {"x": 540, "y": 95, "scale": 1.0}), 0.2, 0.25)]},
+        {"badges": [("p2_b2.png", pos.get("2", {"x": 540, "y": 130, "scale": 1.0}), 0.2, 0.25)]},
+        {"badges": [("p2_b3.png", pos.get("3", {"x": 540, "y": 170, "scale": 1.0}), 0.2, 0.25)]},
+        {"badges": [("p2_b4.png", pos.get("4", {"x": 540, "y": 90, "scale": 1.0}), 0.2, 0.25)]},
+        {"badges": [("p2_b5.png", pos.get("5", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25)]},
+        {"badges": [("p2_b6.png", pos.get("6", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
+        {"badges": [("p2_b7.png", pos.get("7", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25)]},
+        {"badges": [("p2_b8_1.png", pos.get("8_1", {"x": 540, "y": 110, "scale": 1.0}), 0.2, 0.25), ("p2_b8_2.png", pos.get("8_2", {"x": 540, "y": 250, "scale": 1.0}), 1.5, 0.25)]},
+        {"badges": [("p2_b9.png", pos.get("9", {"x": 540, "y": 170, "scale": 1.0}), 0.2, 0.25)]},
+        {"badges": [("p2_b10.png", pos.get("10", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
+        {"badges": [("p2_b11_1.png", pos.get("11_1", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25), ("p2_b11_2.png", pos.get("11_2", {"x": 540, "y": 260, "scale": 1.0}), 1.2, 0.25)]},
+        {"badges": [("p2_b12.png", pos.get("12", {"x": 540, "y": 160, "scale": 1.0}), 0.2, 0.25)]},
+        {"badges": [("p2_b13_1.png", pos.get("13_1", {"x": 540, "y": 110, "scale": 1.0}), 0.2, 0.25), ("p2_b13_2.png", pos.get("13_2", {"x": 540, "y": 250, "scale": 1.0}), 1.0, 0.25)]},
+        {"badges": [("p2_b14.png", pos.get("14", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
     ]
 
     out_mp4 = os.path.join(WORKSPACE, f"Fasting_Series_{style_idx+1}_{chosen_style}.mp4")
@@ -230,16 +238,23 @@ def main():
         # Load badge RGBA images for this scene
         cfg = scenes_cfg[s_idx] if s_idx < len(scenes_cfg) else {"badges": []}
         loaded_badges = []
-        for bname, cy, ent_delay, ex_lead in cfg["badges"]:
+        for bname, bcfg, ent_delay, ex_lead in cfg["badges"]:
             bpath = os.path.join(BADGE_DIR, bname)
             if os.path.exists(bpath):
                 b_rgba = cv2.imread(bpath, cv2.IMREAD_UNCHANGED)
+                sc_val = bcfg.get("scale", 1.0)
+                if abs(sc_val - 1.0) > 0.01:
+                    new_w = max(10, int(b_rgba.shape[1] * sc_val))
+                    new_h = max(10, int(b_rgba.shape[0] * sc_val))
+                    b_rgba = cv2.resize(b_rgba, (new_w, new_h), interpolation=cv2.INTER_LANCZOS4)
+                
                 b_bgr = b_rgba[:, :, :3]
                 b_alpha = (b_rgba[:, :, 3].astype(np.float32) / 255.0)
                 loaded_badges.append({
                     "bgr": b_bgr,
                     "alpha": b_alpha,
-                    "target_y": cy,
+                    "target_x": bcfg.get("x", 540),
+                    "target_y": bcfg.get("y", 90),
                     "t_start": ent_delay,
                     "t_end": max(dur - ex_lead, ent_delay + 0.5),
                     "style": chosen_style
@@ -261,6 +276,7 @@ def main():
             for b in loaded_badges:
                 b_bgr = b["bgr"]
                 b_alpha = b["alpha"]
+                target_x = b["target_x"]
                 target_y = b["target_y"]
                 t_start = b["t_start"]
                 t_end = b["t_end"]
@@ -277,7 +293,7 @@ def main():
                 
                 stamp_badge_final(
                     frame_bgr, draw_bgr, draw_alpha,
-                    x_center=WIDTH // 2, y_center=target_y,
+                    x_center=target_x, y_center=target_y,
                     dx=dx, dy=dy, opacity=opacity,
                     width=WIDTH, height=HEIGHT
                 )
