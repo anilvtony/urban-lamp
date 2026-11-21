@@ -1,0 +1,74 @@
+<!-- INTRO -->
+<prosody rate="medium" pitch="+8%" volume="loud">
+  Hey guys, welcome back to my channel! ఈరోజు మన Body గురించి ఒక super interesting topic మాట్లాడుకుందాం.
+</prosody>
+<break time="250ms"/>
+
+<!-- HOOK -->
+<prosody rate="fast" pitch="+12%" volume="loud">
+  మిత్రమా, నీకు బాగా ఆకలి వేస్తున్నప్పుడు, మన Body వెంటనే లోపల ఉన్న Fatని Burn చేసి Energy తీసుకుంటుంది అని నువ్వు అనుకుంటున్నావా?
+</prosody>
+<break time="200ms"/>
+
+<!-- CURIOSITY -->
+<prosody rate="fast" pitch="+8%" volume="loud">
+  నిజం చెప్పాలంటే, మనం చాలామంది లంచ్ లేట్ అయినా, డిన్నర్ స్కిప్ చేసినా, కడుపులో ఆకలి మొదలవగానే మన Fat కరిగిపోతుంది అని హ్యాపీగా ఫీల్ అవుతాం.
+</prosody>
+<break time="200ms"/>
+<prosody rate="fast" pitch="+10%" volume="loud">
+  కానీ మీకు తెలుసా, నీ కడుపు ఖాళీగా ఉండి ఆకలి వేస్తున్నా సరే, మన Body చాలాసేపు ఆ Fatని కనీసం ముట్టుకోదు కూడా!
+</prosody>
+<break time="200ms"/>
+
+<!-- EXPLANATION SETUP -->
+<prosody rate="fast" pitch="+14%" volume="loud">
+  మరి ఆకలి వేసినప్పుడు మన Body Fatని వాడకపోతే, అసలు ఏం చేస్తుంది? ఎప్పుడు నిజంగా Fatని ఉపయోగించడం start చేస్తుంది?
+</prosody>
+<break time="200ms"/>
+<prosody rate="fast" pitch="+12%" volume="loud">
+  సరే మిత్రమా, ఇక్కడే అసలు Science ఉంది — రండి, చాలా simpleగా break down చేసి చూద్దాం.
+</prosody>
+<break time="250ms"/>
+
+<!-- EXPLANATION -->
+<prosody rate="fast" pitch="+10%" volume="loud">
+  మన Body దగ్గర రెండు రకాల Energy ఉంటాయి — ఒకటి Bloodలోని Glucose, ఇంకొకటి Stored Fat. ఇది అచ్చం నీ జేబులో ఉన్న Cash, Bankలో ఉన్న Fixed Deposit లాంటిది; చిన్న ఖర్చు రాగానే ముందు జేబులో Cash వాడతావు కానీ, వెంటనే Bank FDని break చేయవు కదా!
+</prosody>
+<break time="200ms"/>
+<prosody rate="fast" pitch="+10%" volume="loud">
+  నువ్వు తిన్న తర్వాత ఆకలి వేసిన మొదటి కొన్ని గంటల్లో, Body నీ Liver ఇంకా Musclesలో దాచుకున్న Glycogen అనే Sugarని వాడుకుంటుంది. ఇది అచ్చం ఇంట్లో Kitchen Fridgeలో రెడీగా ఉన్న ఫుడ్ లాంటిది — ముందు దాన్నే వాడుతుంది కానీ, Store roomలో దాచిన సరుకుల జోలికి అస్సలు వెళ్ళదు.
+</prosody>
+<break time="200ms"/>
+<prosody rate="fast" pitch="+10%" volume="loud">
+  అంతే కాదు మిత్రమా, నీ Bloodలో Insulin అనే Hormone ఎక్కువగా ఉన్నంతసేపు, Fat Cells అన్నీ tightగా Lock అయి ఉంటాయి. ఒక Hybrid Carలో Petrol అయిపోయిన తర్వాతే CNG modeకి మారినట్టు, నీ Liverలోని Glycogen తగ్గి Insulin స్థాయి పడిపోయినప్పుడే Body తన Fuel modeని మారుస్తుంది.
+</prosody>
+<break time="200ms"/>
+<prosody rate="fast" pitch="+10%" volume="loud">
+  సాధారణంగా నువ్వు తిన్న 10 నుండి 12 గంటల తర్వాత, Insulin తగ్గి Glucagon అనే ఇంకో Hormone బయటకు వస్తుంది. ఇది అచ్చం తాళం వేసిన బీరువాకి Master Key లాంటిది — ఆ Key తిప్పగానే నీ Fat Cells ఓపెన్ అయి, లోపల ఉన్న Fatty Acidsని Bloodలోకి రిలీజ్ చేస్తాయి.
+</prosody>
+<break time="200ms"/>
+<prosody rate="fast" pitch="+10%" volume="loud">
+  ఆ Fatty Acids అన్నీ నీ Liverకి వెళ్లి Ketones అనే clean fuelగా మారి, నీ Brainకి ఇంకా Bodyకి Energy ఇస్తాయి. ఇది అచ్చం Gas stoveలో సరిగ్గా మంట మండినట్టు — అప్పుడు మాత్రమే నీ Body నిజంగా తన సొంత Fatని Burn చేయడం మొదలుపెడుతుంది.
+</prosody>
+<break time="200ms"/>
+
+<!-- EXPLANATION CLOSER -->
+<prosody rate="fast" pitch="+12%" volume="loud">
+  సో మిత్రమా, కడుపులో ఆకలి వేయడం అంటే కేవలం Ghrelin అనే Hormone ఇచ్చే ఒక Alarm మాత్రమే — అది నీ Body Fatని Burn చేస్తోంది అనడానికి గ్యారంటీ కాదు.
+</prosody>
+<break time="300ms"/>
+
+<!-- PAYOFF -->
+<prosody rate="slow" pitch="-5%" volume="medium">
+  అందుకే గుర్తుపెట్టుకో, నువ్వు ఆకలితో ఉండటం కంటే, నీ Bodyలోని Insulin తగ్గడమే అసలు గేమ్ ఛేంజర్.
+</prosody>
+<break time="400ms"/>
+<prosody rate="fast" pitch="+18%" volume="x-loud">
+  ఆకలి అంటే FAT BURN కాదు, INSULIN తగ్గినప్పుడే అసలు FAT BURN START అవుతుంది!
+</prosody>
+<break time="400ms"/>
+
+<!-- OUTRO -->
+<prosody rate="medium" pitch="+8%" volume="loud">
+  ఈ వీడియో నచ్చితే, please subscribe to my channel — ఇంకా ఇలాంటి ఏ Science topic కావాలన్నా, కింద comment చేయండి!
+</prosody>
