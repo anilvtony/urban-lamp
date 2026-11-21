@@ -1,23 +1,15 @@
 """
-Auto Video Creator Studio - Desktop Application (with Video Preview & 25-Style Animation Engine)
--------------------------------------------------------------------------------------------------
+Auto Video Creator Studio - Desktop Application
+------------------------------------------------
 Features:
-1. File & Folder Selectors:
-   - Images Folder, Audio Folder, Editing Directions, Transcribe file, Output MP4.
-2. Image & Audio Count Verification:
-   - Verifies that count(images) == count(audio) before allowing render.
-3. 25-Style Shuffled Animation Engine:
-   - Automatically picks from 25 distinct kinetic typography algorithms on every build so YouTube never flags repetitive templates.
-   - Can also be set to Shuffled, Specific Style, or Disabled.
-4. Built-in Real-time Video Preview Player:
-   - Play / Pause
-   - Fast Forward (+5s, +10s)
-   - Rewind (-5s, -10s)
-   - Frame-by-frame scrubbing slider
-   - Live timecode & preview canvas before exporting or after rendering
-5. Output Destination & Filename Renamer:
-   - Choose any folder and type any filename for your exported video.
-6. 100% Offline & AI-Free.
+1. Dynamic Latest Project Folder Auto-Detection:
+   - Detects the latest project folder in 'Fasting Series' with Images/ and Audio/ subfolders.
+2. Single Animation Style Per Video with Video-to-Video Shuffle/Cycle:
+   - "Auto-Cycle 25 Styles (1 Style Per Video)": Every video has 1 uniform style, and next video cycles to the next style.
+   - Or choose any specific style manually.
+3. Interactive Real-time Video Preview Player:
+   - Play/Pause, Rewind (-5s, -10s), Fast Forward (+5s, +10s), live slider scrubbing.
+4. Auto-Loads Newly Rendered Video immediately.
 """
 
 import os
@@ -45,6 +37,38 @@ FPS = 30
 SAMPLE_RATE = 44100
 WORKSPACE = r"c:\Users\aanil\Documents\Auto_Video_Editing"
 BADGE_DIR = os.path.join(WORKSPACE, "rendered_badges")
+SERIES_ROOT = r"C:\Users\aanil\Documents\Anxious Anil\Shorts Videos\Projects\Fasting Series"
+STATE_FILE = os.path.join(WORKSPACE, "animation_cycle_state.json")
+
+def detect_latest_project_folder(root_dir=SERIES_ROOT):
+    if not os.path.exists(root_dir):
+        return None
+    subdirs = [os.path.join(root_dir, d) for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, d))]
+    valid_subdirs = [
+        d for d in subdirs 
+        if os.path.isdir(os.path.join(d, "Images")) and os.path.isdir(os.path.join(d, "Audio"))
+    ]
+    if not valid_subdirs:
+        return None
+    return max(valid_subdirs, key=os.path.getmtime)
+
+def get_next_cycle_style():
+    state = {"last_index": -1}
+    if os.path.exists(STATE_FILE):
+        try:
+            with open(STATE_FILE, "r") as f:
+                state = json.load(f)
+        except Exception:
+            state = {"last_index": -1}
+    next_idx = (state.get("last_index", -1) + 1) % len(ANIMATION_STYLES_LIST)
+    return ANIMATION_STYLES_LIST[next_idx], next_idx
+
+def advance_cycle_style():
+    style, next_idx = get_next_cycle_style()
+    state = {"last_index": next_idx, "last_style": style}
+    with open(STATE_FILE, "w") as f:
+        json.dump(state, f, indent=2)
+    return style, next_idx
 
 def read_image_utf8(path):
     pil_im = Image.open(path).convert('RGB')
@@ -64,46 +88,31 @@ def load_audio_samples(path):
         data = w.readframes(n_frames)
     
     if sampwidth == 2:
-        samples = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
+        dtype = np.int16
     elif sampwidth == 4:
-        samples = np.frombuffer(data, dtype=np.int32).astype(np.float32) / 2147483648.0
+        dtype = np.int32
     else:
-        samples = np.frombuffer(data, dtype=np.uint8).astype(np.float32) / 128.0 - 1.0
+        dtype = np.uint8
         
-    if n_channels > 1:
-        samples = samples.reshape(-1, n_channels).mean(axis=1)
+    samples = np.frombuffer(data, dtype=dtype)
+    if n_channels == 2:
+        samples = samples.reshape(-1, 2)
+    else:
+        samples = np.column_stack((samples, samples))
         
     if framerate != SAMPLE_RATE:
         new_len = int(len(samples) * SAMPLE_RATE / framerate)
-        indices = np.linspace(0, len(samples) - 1, new_len)
-        samples = np.interp(indices, np.arange(len(samples)), samples)
+        left = np.interp(np.linspace(0, len(samples), new_len), np.arange(len(samples)), samples[:, 0])
+        right = np.interp(np.linspace(0, len(samples), new_len), np.arange(len(samples)), samples[:, 1])
+        samples = np.column_stack((left, right)).astype(np.int16)
         
     return samples
-
-def load_badge_cv(name):
-    p = os.path.join(BADGE_DIR, f"{name}.png")
-    if not os.path.exists(p):
-        return None, None
-    im = Image.open(p)
-    arr = np.array(im)
-    bgr = cv2.cvtColor(arr[:, :, :3], cv2.COLOR_RGB2BGR)
-    alpha = arr[:, :, 3].astype(np.float32) / 255.0
-    return bgr, alpha
-
-def transform_frame(img, zoom=1.0, pan_x=0.0, pan_y=0.0):
-    h, w = img.shape[:2]
-    center_x = w / 2.0 + pan_x * w * 0.1
-    center_y = h / 2.0 + pan_y * h * 0.1
-    M = cv2.getRotationMatrix2D((center_x, center_y), 0, zoom)
-    M[0, 2] += (w / 2.0 - center_x)
-    M[1, 2] += (h / 2.0 - center_y)
-    return cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
 
 class AutoVideoStudioApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Auto Video Creator Studio - 25 Shuffled Styles & Video Player")
-        self.geometry("1100x820")
+        self.geometry("1120x840")
         self.minsize(980, 750)
         self.configure(bg="#0F172A")
         
@@ -118,15 +127,25 @@ class AutoVideoStudioApp(tk.Tk):
         self.style.map("Action.TButton", background=[("active", "#D97706")])
         self.style.configure("TCombobox", fieldbackground="#0F172A", foreground="#F8FAFC", background="#1E293B")
 
-        # Variables
-        default_proj = r"C:\Users\aanil\Documents\Anxious Anil\Shorts Videos\Projects\Fasting Series\ఆకలి వేసిన వెంటనే మన Body నిజంగా Fatని Burn చేస్తుందా_"
-        self.img_dir_var = tk.StringVar(value=os.path.join(default_proj, "Images"))
-        self.aud_dir_var = tk.StringVar(value=os.path.join(default_proj, "Audio"))
+        # Discover latest project folder
+        latest_folder = detect_latest_project_folder()
+        if latest_folder:
+            default_img = os.path.join(latest_folder, "Images")
+            default_aud = os.path.join(latest_folder, "Audio")
+            default_out = os.path.join(WORKSPACE, "Fasting_Series_Latest.mp4")
+        else:
+            default_img = ""
+            default_aud = ""
+            default_out = os.path.join(WORKSPACE, "output.mp4")
+
+        self.img_dir_var = tk.StringVar(value=default_img)
+        self.aud_dir_var = tk.StringVar(value=default_aud)
         self.edit_dir_var = tk.StringVar(value=os.path.join(WORKSPACE, "Editing_Directions.txt"))
         self.trans_var = tk.StringVar(value=os.path.join(WORKSPACE, "transcribe.txt"))
-        self.out_video_var = tk.StringVar(value=os.path.join(WORKSPACE, "Fasting_Short_25_Animations.mp4"))
+        self.out_video_var = tk.StringVar(value=default_out)
         
-        self.anim_mode_var = tk.StringVar(value="Shuffle 25 Styles (Recommended for YouTube)")
+        next_s, next_idx = get_next_cycle_style()
+        self.anim_mode_var = tk.StringVar(value=f"Cycle Style Per Video (Next: {next_s})")
         self.enable_anim_var = tk.BooleanVar(value=True)
 
         # Video Player state
@@ -139,17 +158,24 @@ class AutoVideoStudioApp(tk.Tk):
 
         self.create_widgets()
         
-        # Auto-load existing video into player if available
-        if os.path.exists(self.out_video_var.get()):
-            self.load_video_file(self.out_video_var.get())
+        # Auto-load latest rendered video if available
+        rendered_candidates = [
+            os.path.join(WORKSPACE, "Fasting_Series_3_wave_unfold.mp4"),
+            os.path.join(WORKSPACE, "Fasting_Series_2_elastic_pop.mp4"),
+            self.out_video_var.get()
+        ]
+        for cand in rendered_candidates:
+            if os.path.exists(cand):
+                self.load_video_file(cand)
+                break
 
     def create_widgets(self):
         # Header
         hdr = tk.Frame(self, bg="#0F172A")
         hdr.pack(fill=tk.X, padx=20, pady=(15, 8))
-        lbl_title = ttk.Label(hdr, text="🎬 Auto Video Creator Studio (25 Shuffled Typography Styles)", style="Header.TLabel")
+        lbl_title = ttk.Label(hdr, text="🎬 Auto Video Creator Studio (1 Style Per Video • Auto-Shuffle)", style="Header.TLabel")
         lbl_title.pack(anchor=tk.W)
-        lbl_desc = ttk.Label(hdr, text="Zero AI, 100% Offline. Includes live video player controls: Play, Pause, Rewind, Fast-Forward, and Scrubbing.")
+        lbl_desc = ttk.Label(hdr, text="Auto-detects latest Fasting Series folder. Renders 1 style per video and shuffles to the next style for each video.")
         lbl_desc.pack(anchor=tk.W)
 
         # Main Split: Left = Controls & Logs, Right = Video Player
@@ -158,27 +184,31 @@ class AutoVideoStudioApp(tk.Tk):
 
         left_frame = tk.Frame(main_paned, bg="#0F172A")
         right_frame = tk.Frame(main_paned, bg="#1E293B", relief=tk.RIDGE, bd=1)
-        main_paned.add(left_frame, minsize=520)
+        main_paned.add(left_frame, minsize=540)
         main_paned.add(right_frame, minsize=380)
 
         # --- LEFT: Project Configuration ---
-        cfg_frame = tk.LabelFrame(left_frame, text=" Project Assets Configuration ", bg="#1E293B", fg="#F59E0B", font=("Segoe UI", 10, "bold"), padx=12, pady=10)
+        cfg_frame = tk.LabelFrame(left_frame, text=" Project Assets (Auto-Detected Latest Folder) ", bg="#1E293B", fg="#F59E0B", font=("Segoe UI", 10, "bold"), padx=12, pady=10)
         cfg_frame.pack(fill=tk.X, pady=(0, 8))
 
-        self.add_browse_row(cfg_frame, "📁 Images Folder:", self.img_dir_var, self.browse_img_dir, 0)
-        self.add_browse_row(cfg_frame, "🎵 Audio Folder:", self.aud_dir_var, self.browse_aud_dir, 1)
-        self.add_browse_row(cfg_frame, "📝 Directions:", self.edit_dir_var, self.browse_edit_file, 2)
-        self.add_browse_row(cfg_frame, "🎙️ Transcribe:", self.trans_var, self.browse_trans_file, 3)
-        self.add_browse_row(cfg_frame, "💾 Export Video:", self.out_video_var, self.browse_out_video, 4)
+        btn_auto_detect = tk.Button(cfg_frame, text="🔄 Auto-Detect Latest Project Folder", bg="#0284C7", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, pady=3, command=self.refresh_latest_folder)
+        btn_auto_detect.grid(row=0, column=0, columnspan=3, sticky=tk.W, pady=(0, 6))
+
+        self.add_browse_row(cfg_frame, "📁 Images Folder:", self.img_dir_var, self.browse_img_dir, 1)
+        self.add_browse_row(cfg_frame, "🎵 Audio Folder:", self.aud_dir_var, self.browse_aud_dir, 2)
+        self.add_browse_row(cfg_frame, "📝 Directions:", self.edit_dir_var, self.browse_edit_file, 3)
+        self.add_browse_row(cfg_frame, "🎙️ Transcribe:", self.trans_var, self.browse_trans_file, 4)
+        self.add_browse_row(cfg_frame, "💾 Export Video:", self.out_video_var, self.browse_out_video, 5)
 
         # 25-Style Animation Selection
-        anim_box = tk.LabelFrame(left_frame, text=" 25 Cinematic Typography Animation Engine ", bg="#1E293B", fg="#38BDF8", font=("Segoe UI", 10, "bold"), padx=12, pady=8)
+        anim_box = tk.LabelFrame(left_frame, text=" 25 Animation Styles (1 Uniform Style Per Video • Auto-Shuffle) ", bg="#1E293B", fg="#38BDF8", font=("Segoe UI", 10, "bold"), padx=12, pady=8)
         anim_box.pack(fill=tk.X, pady=(0, 8))
 
-        chk_en = ttk.Checkbutton(anim_box, text="Enable Kinetic Animations", variable=self.enable_anim_var)
+        chk_en = ttk.Checkbutton(anim_box, text="Enable Kinetic Typography Animations", variable=self.enable_anim_var)
         chk_en.pack(anchor=tk.W)
 
-        modes = ["Shuffle 25 Styles (Recommended for YouTube)"] + ANIMATION_STYLES_LIST
+        next_s, _ = get_next_cycle_style()
+        modes = [f"Cycle Style Per Video (Next: {next_s})"] + ANIMATION_STYLES_LIST
         lbl_m = ttk.Label(anim_box, text="Animation Mode:")
         lbl_m.pack(anchor=tk.W, pady=(4, 2))
         self.cmb_anim = ttk.Combobox(anim_box, values=modes, textvariable=self.anim_mode_var, state="readonly", width=45)
@@ -245,92 +275,98 @@ class AutoVideoStudioApp(tk.Tk):
         btn_open = tk.Button(right_frame, text="📂 Open External Player", bg="#334155", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, padx=10, command=self.open_external_video)
         btn_open.pack(pady=(2, 10))
 
+    def refresh_latest_folder(self):
+        latest = detect_latest_project_folder()
+        if latest:
+            self.img_dir_var.set(os.path.join(latest, "Images"))
+            self.aud_dir_var.set(os.path.join(latest, "Audio"))
+            self.log(f"Auto-detected latest folder: {latest}")
+            messagebox.showinfo("Project Detected", f"Auto-selected latest project:\n{os.path.basename(latest)}")
+        else:
+            messagebox.showwarning("Not Found", "No project directories with Images and Audio found.")
+
     def add_browse_row(self, parent, label_text, str_var, browse_cmd, row_idx):
         lbl = tk.Label(parent, text=label_text, bg="#1E293B", fg="#E2E8F0", font=("Segoe UI", 9))
         lbl.grid(row=row_idx, column=0, sticky=tk.W, pady=3)
-        entry = tk.Entry(parent, textvariable=str_var, bg="#0F172A", fg="#F8FAFC", insertbackground="white", font=("Segoe UI", 9), relief=tk.FLAT, width=38)
-        entry.grid(row=row_idx, column=1, padx=6, pady=3, sticky=tk.EW)
-        btn = tk.Button(parent, text="Browse...", bg="#334155", fg="#F8FAFC", font=("Segoe UI", 8, "bold"), relief=tk.FLAT, command=browse_cmd)
+        ent = ttk.Entry(parent, textvariable=str_var, width=42)
+        ent.grid(row=row_idx, column=1, sticky=tk.EW, padx=6, pady=3)
+        btn = ttk.Button(parent, text="Browse...", command=browse_cmd)
         btn.grid(row=row_idx, column=2, pady=3)
         parent.columnconfigure(1, weight=1)
-
-    def browse_img_dir(self):
-        d = filedialog.askdirectory(title="Select Images Folder", initialdir=self.img_dir_var.get())
-        if d: self.img_dir_var.set(d)
-
-    def browse_aud_dir(self):
-        d = filedialog.askdirectory(title="Select Audio Folder", initialdir=self.aud_dir_var.get())
-        if d: self.aud_dir_var.set(d)
-
-    def browse_edit_file(self):
-        f = filedialog.askopenfilename(title="Select Editing Directions File", filetypes=[("Text files", "*.txt")])
-        if f: self.edit_dir_var.set(f)
-
-    def browse_trans_file(self):
-        f = filedialog.askopenfilename(title="Select Transcribe File", filetypes=[("Text files", "*.txt")])
-        if f: self.trans_var.set(f)
-
-    def browse_out_video(self):
-        current_path = self.out_video_var.get()
-        init_dir = os.path.dirname(current_path) if current_path else WORKSPACE
-        init_file = os.path.basename(current_path) if current_path else "My_Short_Video.mp4"
-        f = filedialog.asksaveasfilename(
-            title="Choose Name and Destination for Export Video", 
-            initialdir=init_dir,
-            initialfile=init_file,
-            defaultextension=".mp4", 
-            filetypes=[("MP4 Video (*.mp4)", "*.mp4"), ("All files (*.*)", "*.*")]
-        )
-        if f: 
-            self.out_video_var.set(f)
-            self.log(f"Export filename set to: {os.path.basename(f)}")
 
     def log(self, text):
         self.txt_log.insert(tk.END, text + "\n")
         self.txt_log.see(tk.END)
 
-    # --- VIDEO PLAYER LOGIC ---
+    def browse_img_dir(self):
+        d = filedialog.askdirectory(initialdir=SERIES_ROOT, title="Select Images Directory")
+        if d: self.img_dir_var.set(d)
+
+    def browse_aud_dir(self):
+        d = filedialog.askdirectory(initialdir=SERIES_ROOT, title="Select Audio Directory")
+        if d: self.aud_dir_var.set(d)
+
+    def browse_edit_file(self):
+        f = filedialog.askopenfilename(initialdir=WORKSPACE, filetypes=[("Text Files", "*.txt")])
+        if f: self.edit_dir_var.set(f)
+
+    def browse_trans_file(self):
+        f = filedialog.askopenfilename(initialdir=WORKSPACE, filetypes=[("Text Files", "*.txt")])
+        if f: self.trans_var.set(f)
+
+    def browse_out_video(self):
+        f = filedialog.asksaveasfilename(initialdir=WORKSPACE, defaultextension=".mp4", filetypes=[("MP4 Video", "*.mp4")])
+        if f: self.out_video_var.set(f)
+
+    # --- VIDEO PLAYER CONTROLS ---
     def load_video_file(self, video_path):
         if not os.path.exists(video_path):
             return
-        if self.cap:
+        if self.cap is not None:
             self.cap.release()
-            
+            self.cap = None
+
         self.cap = cv2.VideoCapture(video_path)
+        if not self.cap.isOpened():
+            self.log(f"Failed to load video: {video_path}")
+            return
+
         self.video_total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        self.video_fps = self.cap.get(cv2.CAP_PROP_FPS) or 30.0
+        fps = self.cap.get(cv2.CAP_PROP_FPS)
+        self.video_fps = fps if fps > 0 else 30.0
         self.slider.config(to=max(1, self.video_total_frames - 1))
         self.current_frame_idx = 0
-        self.show_frame(0)
-        self.update_timecode()
+        self.seek_frame(0)
+        self.log(f"Loaded video preview: {os.path.basename(video_path)} ({self.video_total_frames} frames)")
 
-    def show_frame(self, frame_idx):
-        if not self.cap or not self.cap.isOpened():
+    def seek_frame(self, frame_num):
+        if self.cap is None or self.video_total_frames == 0:
             return
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+        frame_num = max(0, min(self.video_total_frames - 1, frame_num))
+        self.current_frame_idx = frame_num
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
         ret, frame = self.cap.read()
         if ret:
-            # Resize for 9:16 canvas
-            h, w = frame.shape[:2]
-            scaled = cv2.resize(frame, (self.canvas_w, self.canvas_h), interpolation=cv2.INTER_AREA)
-            rgb = cv2.cvtColor(scaled, cv2.COLOR_BGR2RGB)
-            self.photo = ImageTk.PhotoImage(image=Image.fromarray(rgb))
-            self.preview_canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
+            self.display_frame(frame)
+            self.update_player_ui()
 
-    def update_timecode(self):
-        cur_sec = self.current_frame_idx / self.video_fps if self.video_fps > 0 else 0
-        tot_sec = self.video_total_frames / self.video_fps if self.video_fps > 0 else 0
-        c_m, c_s = divmod(int(cur_sec), 60)
-        t_m, t_s = divmod(int(tot_sec), 60)
-        self.lbl_timecode.config(text=f"{c_m:02d}:{c_s:02d} / {t_m:02d}:{t_s:02d} (Frame {self.current_frame_idx}/{self.video_total_frames})")
+    def seek_seconds(self, delta_s):
+        if self.cap is None:
+            return
+        new_frame = int(self.current_frame_idx + delta_s * self.video_fps)
+        self.seek_frame(new_frame)
+
+    def on_slider_scroll(self, val):
+        if not self.is_playing:
+            self.seek_frame(int(float(val)))
 
     def toggle_play(self):
-        if not self.cap or not self.cap.isOpened():
-            target_vid = self.out_video_var.get()
-            if os.path.exists(target_vid):
-                self.load_video_file(target_vid)
+        if self.cap is None:
+            out_vid = self.out_video_var.get()
+            if os.path.exists(out_vid):
+                self.load_video_file(out_vid)
             else:
-                messagebox.showinfo("Preview", "No video loaded yet. Render the video or select an existing output video file.")
+                messagebox.showinfo("Player", "No video loaded. Render video first.")
                 return
 
         if self.is_playing:
@@ -338,42 +374,39 @@ class AutoVideoStudioApp(tk.Tk):
             self.btn_play.config(text="▶ PLAY", bg="#F59E0B")
         else:
             self.is_playing = True
-            self.btn_play.config(text="⏸ PAUSE", bg="#EF4444")
+            self.btn_play.config(text="⏸ PAUSE", bg="#10B981")
             self.play_loop()
 
     def play_loop(self):
-        if not self.is_playing:
+        if not self.is_playing or self.cap is None:
             return
-        if self.current_frame_idx >= self.video_total_frames - 1:
+        
+        ret, frame = self.cap.read()
+        if ret:
+            self.current_frame_idx += 1
+            self.display_frame(frame)
+            self.update_player_ui()
+            delay_ms = int(1000 / self.video_fps)
+            self.after(delay_ms, self.play_loop)
+        else:
             self.is_playing = False
             self.btn_play.config(text="▶ PLAY", bg="#F59E0B")
-            return
+            self.seek_frame(0)
 
-        self.current_frame_idx += 1
+    def display_frame(self, bgr_frame):
+        rgb_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
+        resized = cv2.resize(rgb_frame, (self.canvas_w, self.canvas_h), interpolation=cv2.INTER_AREA)
+        im_pil = Image.fromarray(resized)
+        self.tk_photo = ImageTk.PhotoImage(image=im_pil)
+        self.preview_canvas.create_image(0, 0, image=self.tk_photo, anchor=tk.NW)
+
+    def update_player_ui(self):
         self.slider_var.set(self.current_frame_idx)
-        self.show_frame(self.current_frame_idx)
-        self.update_timecode()
-        
-        delay_ms = int(1000 / self.video_fps)
-        self.after(delay_ms, self.play_loop)
-
-    def on_slider_scroll(self, val):
-        if not self.cap or not self.cap.isOpened():
-            return
-        target = int(float(val))
-        self.current_frame_idx = target
-        self.show_frame(target)
-        self.update_timecode()
-
-    def seek_seconds(self, delta_s):
-        if not self.cap or not self.cap.isOpened():
-            return
-        delta_f = int(delta_s * self.video_fps)
-        new_f = max(0, min(self.video_total_frames - 1, self.current_frame_idx + delta_f))
-        self.current_frame_idx = new_f
-        self.slider_var.set(new_f)
-        self.show_frame(new_f)
-        self.update_timecode()
+        cur_s = self.current_frame_idx / self.video_fps
+        tot_s = self.video_total_frames / self.video_fps
+        cur_str = f"{int(cur_s // 60):02d}:{int(cur_s % 60):02d}"
+        tot_str = f"{int(tot_s // 60):02d}:{int(tot_s % 60):02d}"
+        self.lbl_timecode.config(text=f"{cur_str} / {tot_str} (Frame {self.current_frame_idx})")
 
     def open_external_video(self):
         out_vid = self.out_video_var.get()
@@ -412,7 +445,6 @@ class AutoVideoStudioApp(tk.Tk):
             messagebox.showerror("Count Mismatch Error", msg)
             return
 
-        # Pause preview if playing
         if self.is_playing:
             self.toggle_play()
 
@@ -433,101 +465,61 @@ class AutoVideoStudioApp(tk.Tk):
             enable_anim = self.enable_anim_var.get()
             mode_choice = self.anim_mode_var.get()
 
-            temp_vid = os.path.join(WORKSPACE, "temp_gui_video.mp4")
-            temp_aud = os.path.join(WORKSPACE, "temp_gui_audio.wav")
+            # Determine Animation Style for this Video
+            if "Cycle Style" in mode_choice or "Shuffle" in mode_choice:
+                chosen_style, style_idx = advance_cycle_style()
+                self.log(f"Auto-Cycled to Animation Style [{style_idx+1}/25]: '{chosen_style}'")
+            else:
+                chosen_style = mode_choice
+                self.log(f"User Selected Animation Style: '{chosen_style}'")
+
+            self.log(f"Uniformity: Applying '{chosen_style}' across ALL scenes of this video.")
 
             num_scenes = len(img_files)
             self.log(f"Starting Video Render for {num_scenes} scenes...")
-            self.log(f"Images: {img_dir}")
-            self.log(f"Audio: {aud_dir}")
 
-            # 25 Shuffled Styles Selection
-            if "Shuffle 25" in mode_choice:
-                shuffled_styles = random.sample(ANIMATION_STYLES_LIST, len(ANIMATION_STYLES_LIST))
-                self.log(f"Dynamic Shuffled Animation Pool: {shuffled_styles[:6]}...")
-            else:
-                shuffled_styles = [mode_choice] * 25
-                self.log(f"Single Selected Animation Style: {mode_choice}")
+            # Audio durations
+            durations = []
+            for af in aud_files:
+                dur = get_audio_duration(os.path.join(aud_dir, af))
+                durations.append(dur)
+            total_dur = sum(durations)
+            total_frames = int(total_dur * FPS)
 
-            scene_anims = {
-                1: shuffled_styles[0],
-                2: shuffled_styles[1],
-                3: shuffled_styles[2],
-                4: shuffled_styles[3],
-                5: shuffled_styles[4],
-                6: shuffled_styles[5],
-                '7_1': shuffled_styles[6],
-                '7_2': shuffled_styles[7],
-                8: shuffled_styles[8],
-                '9_1': shuffled_styles[9],
-                '9_2': shuffled_styles[10],
-                '10_1': shuffled_styles[11],
-                '10_2': shuffled_styles[12],
-                11: shuffled_styles[13],
-                12: shuffled_styles[14],
-                13: shuffled_styles[15],
-                '14_1': shuffled_styles[16],
-                '14_2': shuffled_styles[17],
-                15: shuffled_styles[18],
-            }
+            temp_vid = os.path.join(WORKSPACE, "temp_gui_video.mp4")
+            temp_aud = os.path.join(WORKSPACE, "temp_gui_audio.wav")
 
-            # 1. Load assets
-            base_images = []
-            audio_durations = []
-            audio_samples_list = []
-            
-            for i in range(num_scenes):
-                im_p = os.path.join(img_dir, img_files[i])
-                au_p = os.path.join(aud_dir, aud_files[i])
-                
-                im = read_image_utf8(im_p)
-                im_res = cv2.resize(im, (WIDTH, HEIGHT), interpolation=cv2.INTER_AREA)
-                base_images.append(im_res)
-                
-                dur = get_audio_duration(au_p)
-                audio_durations.append(dur)
-                
-                samples = load_audio_samples(au_p)
-                audio_samples_list.append(samples)
-                
-            total_dur = sum(audio_durations)
-            scene_frames = [int(d * FPS) for d in audio_durations]
-            total_frames = sum(scene_frames)
-            
-            self.log(f"Total Video Duration: {total_dur:.2f}s ({total_frames} frames)")
+            # Master audio track
+            self.log("Concatenating master audio...")
+            full_audio_samples = []
+            for af in aud_files:
+                samples = load_audio_samples(os.path.join(aud_dir, af))
+                full_audio_samples.append(samples)
+            full_audio = np.concatenate(full_audio_samples, axis=0)
+            with wave.open(temp_aud, 'wb') as w:
+                w.setnchannels(2)
+                w.setsampwidth(2)
+                w.setframerate(SAMPLE_RATE)
+                w.writeframes(full_audio.tobytes())
 
-            # 2. Badges
-            badges = {
-                'b1': load_badge_cv('b1'),
-                'b2': load_badge_cv('b2'),
-                'b3': load_badge_cv('b3'),
-                'b4': load_badge_cv('b4_stacked'),
-                'b5': load_badge_cv('b5'),
-                'b6': load_badge_cv('b6'),
-                'b7_1': load_badge_cv('b7_1'),
-                'b7_2': load_badge_cv('b7_2'),
-                'b8': load_badge_cv('b8'),
-                'b9_1': load_badge_cv('b9_1'),
-                'b9_2': load_badge_cv('b9_2'),
-                'b10_1': load_badge_cv('b10_1_wrapped'),
-                'b10_2': load_badge_cv('b10_2_wrapped'),
-                'b11': load_badge_cv('b11'),
-                'b12': load_badge_cv('b12'),
-                'b13': load_badge_cv('b13'),
-                'b14_1': load_badge_cv('b14_1'),
-                'b14_2': load_badge_cv('b14_2'),
-                'b15': load_badge_cv('b15'),
-            }
-
-            # 3. Transitions
-            TRANS_FRAMES = 8
-            motions = [
-                'zoom_in', 'zoom_in', 'pan_right', 'zoom_in', 'pan_left', 
-                'zoom_in', 'pan_right', 'zoom_in', 'zoom_in', 'pan_right', 
-                'zoom_in', 'pan_up', 'zoom_in', 'zoom_out', 'zoom_out'
+            # Scenes badge configuration mapping
+            scenes_cfg = [
+                {"badges": [("p2_b1.png", 240, 0.2, 0.25)]},
+                {"badges": [("p2_b2.png", 240, 0.2, 0.25)]},
+                {"badges": [("p2_b3.png", 240, 0.2, 0.25)]},
+                {"badges": [("p2_b4.png", 240, 0.2, 0.25)]},
+                {"badges": [("p2_b5.png", 240, 0.2, 0.25)]},
+                {"badges": [("p2_b6.png", 240, 0.2, 0.25)]},
+                {"badges": [("p2_b7.png", 240, 0.2, 0.25)]},
+                {"badges": [("p2_b8_1.png", 220, 0.2, 0.25), ("p2_b8_2.png", 370, 1.5, 0.25)]},
+                {"badges": [("p2_b9.png", 240, 0.2, 0.25)]},
+                {"badges": [("p2_b10.png", 240, 0.2, 0.25)]},
+                {"badges": [("p2_b11_1.png", 220, 0.2, 0.25), ("p2_b11_2.png", 370, 1.2, 0.25)]},
+                {"badges": [("p2_b12.png", 240, 0.2, 0.25)]},
+                {"badges": [("p2_b13_1.png", 220, 0.2, 0.25), ("p2_b13_2.png", 375, 1.0, 0.25)]},
+                {"badges": [("p2_b14.png", 1480, 0.2, 0.25)]},
             ]
 
-            # 4. FFmpeg Video Pipe
             ffmpeg_cmd = [
                 'ffmpeg', '-y',
                 '-f', 'rawvideo',
@@ -537,185 +529,87 @@ class AutoVideoStudioApp(tk.Tk):
                 '-r', str(FPS),
                 '-i', '-',
                 '-c:v', 'libx264',
-                '-preset', 'ultrafast',
+                '-preset', 'fast',
                 '-crf', '18',
                 '-pix_fmt', 'yuv420p',
                 temp_vid
             ]
-            proc = subprocess.Popen(ffmpeg_cmd, stdin=subprocess.PIPE)
-            rendered_frames = 0
-            
-            for i in range(num_scenes):
-                s_idx = i + 1
-                n_frames = scene_frames[i]
-                dur = audio_durations[i]
-                cur_img = base_images[i]
-                next_img = base_images[i + 1] if i + 1 < num_scenes else None
-                motion = motions[i % len(motions)]
+            pipe = subprocess.Popen(ffmpeg_cmd, stdin=subprocess.PIPE)
+            global_frame = 0
+
+            for s_idx in range(num_scenes):
+                dur = durations[s_idx]
+                scene_frames = int(dur * FPS)
+                img_p = os.path.join(img_dir, img_files[s_idx])
+                base_bgr = read_image_utf8(img_p)
+                orig_h, orig_w = base_bgr.shape[:2]
                 
-                for f in range(n_frames):
-                    prog = f / max(1, n_frames - 1)
-                    t_sec = prog * dur
-                    
-                    zoom, px, py = 1.0, 0.0, 0.0
-                    if motion == 'zoom_in':
-                        zoom = 1.0 + 0.035 * prog
-                    elif motion == 'zoom_out':
-                        zoom = 1.035 - 0.035 * prog
-                    elif motion == 'pan_right':
-                        zoom = 1.025
-                        px = -0.015 + 0.03 * prog
-                    elif motion == 'pan_left':
-                        zoom = 1.025
-                        px = 0.015 - 0.03 * prog
-                    elif motion == 'pan_up':
-                        zoom = 1.025
-                        py = 0.015 - 0.03 * prog
+                scale = max(WIDTH / orig_w, HEIGHT / orig_h)
+                nw, nh = int(orig_w * scale), int(orig_h * scale)
+                scaled_base = cv2.resize(base_bgr, (nw, nh), interpolation=cv2.INTER_LANCZOS4)
+                x_off = (nw - WIDTH) // 2
+                y_off = (nh - HEIGHT) // 2
+                cropped_base = scaled_base[y_off:y_off+HEIGHT, x_off:x_off+WIDTH]
 
-                    is_trans = (next_img is not None) and (f >= n_frames - TRANS_FRAMES)
-                    if is_trans:
-                        tf = f - (n_frames - TRANS_FRAMES)
-                        tp = (tf + 1) / (TRANS_FRAMES + 1)
-                        ease = 0.5 - 0.5 * math.cos(math.pi * tp)
-                        frame_a = transform_frame(cur_img, zoom=zoom, pan_x=px, pan_y=py)
-                        frame_b = transform_frame(next_img, zoom=1.0, pan_x=0.0, pan_y=0.0)
-                        
-                        if s_idx in (1, 5, 14):
-                            shift = int(WIDTH * ease)
-                            frame = np.zeros_like(frame_a)
-                            frame[:, :WIDTH - shift] = frame_a[:, shift:]
-                            frame[:, WIDTH - shift:] = frame_b[:, :shift]
-                            blur_k = int(abs(math.sin(tp * math.pi)) * 14) * 2 + 1
-                            if blur_k > 1:
-                                frame = cv2.GaussianBlur(frame, (blur_k, 1), 0)
-                        elif s_idx == 2:
-                            shift = int(HEIGHT * ease)
-                            frame = np.zeros_like(frame_a)
-                            frame[:HEIGHT - shift, :] = frame_a[shift:, :]
-                            frame[HEIGHT - shift:, :] = frame_b[:shift, :]
-                        elif s_idx == 3:
-                            frame = transform_frame(next_img if tp > 0.5 else cur_img, zoom=1.06)
-                        elif s_idx == 4:
-                            scale = 1.0 - 0.3 * tp
-                            h_s, w_s = int(HEIGHT * scale), int(WIDTH * scale)
-                            scaled_a = cv2.resize(frame_a, (w_s, h_s))
-                            frame = frame_b.copy()
-                            y_off, x_off = (HEIGHT - h_s) // 2, (WIDTH - w_s) // 2
-                            frame[y_off:y_off + h_s, x_off:x_off + w_s] = scaled_a
-                        elif s_idx == 6:
-                            half_w = int((WIDTH / 2) * tp)
-                            frame = frame_b.copy()
-                            frame[:, half_w:WIDTH - half_w] = frame_a[:, half_w:WIDTH - half_w]
-                        elif s_idx == 7:
-                            shift = int(WIDTH * ease)
-                            frame = np.zeros_like(frame_a)
-                            frame[:, shift:] = frame_a[:, :WIDTH - shift]
-                            frame[:, :shift] = frame_b[:, WIDTH - shift:]
-                        elif s_idx == 8:
-                            shift = int(HEIGHT * ease)
-                            frame = np.zeros_like(frame_a)
-                            frame[:HEIGHT - shift, :] = frame_a[shift:, :]
-                            frame[HEIGHT - shift:, :] = frame_b[:shift, :]
-                        elif s_idx == 9:
-                            frame_a_z = transform_frame(cur_img, zoom=1.0 + 0.3 * tp)
-                            frame = cv2.addWeighted(frame_a_z, 1.0 - tp, frame_b, tp, 0)
-                        elif s_idx == 10:
-                            blend = cv2.addWeighted(frame_a, 1.0 - tp, frame_b, tp, 0)
-                            flash = np.full_like(blend, int(math.sin(math.pi * tp) * 110), dtype=np.uint8)
-                            frame = cv2.add(blend, flash)
-                        elif s_idx == 11:
-                            shake_x = int(math.sin(tp * 20) * 12)
-                            M = np.float32([[1, 0, shake_x], [0, 1, 0]])
-                            frame = cv2.warpAffine(frame_b, M, (WIDTH, HEIGHT))
-                        elif s_idx == 12:
-                            shift = int(HEIGHT * ease)
-                            frame = np.zeros_like(frame_a)
-                            frame[shift:, :] = frame_a[:HEIGHT - shift, :]
-                            frame[:shift, :] = frame_b[HEIGHT - shift:, :]
-                        elif s_idx == 13:
-                            frame = transform_frame(next_img, zoom=1.10 - 0.10 * tp)
-                        else:
-                            frame = cv2.addWeighted(frame_a, 1.0 - ease, frame_b, ease, 0)
-                    else:
-                        frame = transform_frame(cur_img, zoom=zoom, pan_x=px, pan_y=py)
+                cfg = scenes_cfg[s_idx] if s_idx < len(scenes_cfg) else {"badges": []}
+                loaded_badges = []
+                for bname, cy, ent_delay, ex_lead in cfg["badges"]:
+                    bpath = os.path.join(BADGE_DIR, bname)
+                    if os.path.exists(bpath):
+                        b_rgba = cv2.imread(bpath, cv2.IMREAD_UNCHANGED)
+                        loaded_badges.append({
+                            "bgr": b_rgba[:, :, :3],
+                            "alpha": (b_rgba[:, :, 3].astype(np.float32) / 255.0),
+                            "target_y": cy,
+                            "t_start": ent_delay,
+                            "t_end": max(dur - ex_lead, ent_delay + 0.5)
+                        })
 
-                    # Dynamic 25-Style Shuffled Badge Application
-                    def apply_badge(bid, x, y, t_in, t_out, style_key):
-                        bgr, alpha = badges[bid]
-                        st = scene_anims.get(style_key, "elastic_pop")
-                        draw_bgr, draw_alpha, dx, dy, op = render_badge_advanced(
-                            bgr, alpha, t_sec, t_in, t_out, st, enable_anim
+                for f in range(scene_frames):
+                    t_sec = f / FPS
+                    zoom = 1.0 + 0.05 * (f / max(1, scene_frames))
+                    cw = int(WIDTH / zoom)
+                    ch = int(HEIGHT / zoom)
+                    cx, cy = WIDTH // 2, HEIGHT // 2
+                    x1 = max(0, cx - cw // 2)
+                    y1 = max(0, cy - ch // 2)
+                    frame_crop = cropped_base[y1:y1+ch, x1:x1+cw]
+                    frame_bgr = cv2.resize(frame_crop, (WIDTH, HEIGHT), interpolation=cv2.INTER_LINEAR)
+
+                    for b in loaded_badges:
+                        b_bgr = b["bgr"]
+                        b_alpha = b["alpha"]
+                        target_y = b["target_y"]
+                        t_start = b["t_start"]
+                        t_end = b["t_end"]
+
+                        if t_sec < t_start or t_sec > t_end + 0.3:
+                            continue
+
+                        draw_bgr, draw_alpha, dx, dy, opacity = render_badge_advanced(
+                            b_bgr, b_alpha, t_sec, t_start, t_end,
+                            anim_style=chosen_style, enable_anim=enable_anim,
+                            width=WIDTH, height=HEIGHT
                         )
-                        stamp_badge_final(frame, draw_bgr, draw_alpha, x, y, dx, dy, op)
 
-                    if s_idx == 1:
-                        apply_badge('b1', WIDTH // 2, 220, 0.2, dur, 1)
-                    elif s_idx == 2:
-                        apply_badge('b2', WIDTH // 2, 220, 0.1, dur, 2)
-                    elif s_idx == 3:
-                        apply_badge('b3', WIDTH // 2, 200, 0.1, dur, 3)
-                    elif s_idx == 4:
-                        apply_badge('b4', 220, 630, 0.15, dur, 4)
-                    elif s_idx == 5:
-                        apply_badge('b5', WIDTH // 2, 1720, 0.2, dur, 5)
-                    elif s_idx == 6:
-                        apply_badge('b6', WIDTH // 2, 220, 0.1, dur, 6)
-                    elif s_idx == 7:
-                        apply_badge('b7_1', WIDTH // 2, 170, 0.1, dur, '7_1')
-                        apply_badge('b7_2', WIDTH // 2, 310, 2.5, dur, '7_2')
-                    elif s_idx == 8:
-                        apply_badge('b8', WIDTH // 2, 220, 0.1, dur, 8)
-                    elif s_idx == 9:
-                        apply_badge('b9_1', WIDTH // 2, 220, 0.1, dur, '9_1')
-                        apply_badge('b9_2', WIDTH // 2, 1720, 2.5, dur, '9_2')
-                    elif s_idx == 10:
-                        apply_badge('b10_1', 820, 1020, 0.1, dur, '10_1')
-                        apply_badge('b10_2', 820, 1160, 2.0, dur, '10_2')
-                    elif s_idx == 11:
-                        apply_badge('b11', WIDTH // 2, 200, 0.1, dur, 11)
-                    elif s_idx == 12:
-                        apply_badge('b12', WIDTH // 2, 220, 0.1, dur, 12)
-                    elif s_idx == 13:
-                        apply_badge('b13', WIDTH // 2, 220, 0.1, dur, 13)
-                    elif s_idx == 14:
-                        apply_badge('b14_1', WIDTH // 2, 220, 0.1, dur, '14_1')
-                        apply_badge('b14_2', WIDTH // 2, 1720, 1.2, dur, '14_2')
-                    elif s_idx == 15 and t_sec >= 1.0:
-                        apply_badge('b15', WIDTH // 2, 1720, 1.0, dur, 15)
+                        stamp_badge_final(
+                            frame_bgr, draw_bgr, draw_alpha,
+                            x_center=WIDTH // 2, y_center=target_y,
+                            dx=dx, dy=dy, opacity=opacity,
+                            width=WIDTH, height=HEIGHT
+                        )
 
-                    proc.stdin.write(frame.tobytes())
-                    rendered_frames += 1
-                    
-                    if rendered_frames % 25 == 0 or rendered_frames == total_frames:
-                        pct = (rendered_frames / total_frames) * 100
+                    pipe.stdin.write(frame_bgr.tobytes())
+                    global_frame += 1
+                    if global_frame % 30 == 0 or global_frame == total_frames:
+                        pct = (global_frame / total_frames) * 100
                         self.progress_bar['value'] = pct
-                        self.lbl_status.config(text=f"Rendering: {pct:.1f}% ({rendered_frames}/{total_frames} frames)")
-            
-            proc.stdin.close()
-            proc.wait()
-            self.log("Video frames rendered successfully!")
+                        self.lbl_status.config(text=f"Rendering: {pct:.1f}% ({global_frame}/{total_frames} frames)")
 
-            # Master Narration Audio
-            self.log("Muxing narration audio...")
-            total_audio_len = int(sum(audio_durations) * SAMPLE_RATE) + SAMPLE_RATE
-            full_audio = np.zeros(total_audio_len, dtype=np.float32)
-            cur_pos = 0
-            for samples in audio_samples_list:
-                full_audio[cur_pos:cur_pos + len(samples)] += samples
-                cur_pos += len(samples)
+            pipe.stdin.close()
+            pipe.wait()
 
-            max_amp = np.max(np.abs(full_audio))
-            if max_amp > 0.95:
-                full_audio = (full_audio / max_amp) * 0.95
-                
-            int_audio = (full_audio * 32767).astype(np.int16)
-            with wave.open(temp_aud, 'wb') as w:
-                w.setnchannels(1)
-                w.setframerate(SAMPLE_RATE)
-                w.setsampwidth(2)
-                w.writeframes(int_audio.tobytes())
-                
-            self.log(f"Finalizing MP4 Video -> {out_video}")
+            self.log(f"Muxing MP4 Video -> {out_video}")
             mux_cmd = [
                 'ffmpeg', '-y',
                 '-i', temp_vid,
@@ -727,19 +621,22 @@ class AutoVideoStudioApp(tk.Tk):
                 out_video
             ]
             subprocess.run(mux_cmd, check=True)
-            
+
             if os.path.exists(temp_vid): os.remove(temp_vid)
             if os.path.exists(temp_aud): os.remove(temp_aud)
-            
+
             elapsed_total = time.time() - t_start
             self.progress_bar['value'] = 100
-            self.lbl_status.config(text=f"Done! Video generated in {elapsed_total:.1f}s")
+            self.lbl_status.config(text=f"Done! Rendered in {elapsed_total:.1f}s")
             self.log("==================================================")
             self.log(f"🎉 VIDEO COMPLETED SUCCESSFULLY IN {elapsed_total:.1f}s!")
-            self.log(f"File Saved: {out_video}")
+            self.log(f"Output File: {out_video}")
+            self.log(f"Animation Style Applied: '{chosen_style}'")
+            next_st, _ = get_next_cycle_style()
+            self.log(f"Next Video Will Use: '{next_st}'")
             self.log("==================================================")
 
-            # Auto load into built-in player
+            # Auto load into preview player
             self.load_video_file(out_video)
 
         except Exception as e:
