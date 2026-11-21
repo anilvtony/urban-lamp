@@ -22,6 +22,36 @@ WORKSPACE = r"c:\Users\aanil\Documents\Auto_Video_Editing"
 BADGE_DIR = os.path.join(WORKSPACE, "rendered_badges")
 SERIES_ROOT = r"C:\Users\aanil\Documents\Anxious Anil\Shorts Videos\Projects\Fasting Series"
 STATE_FILE = os.path.join(WORKSPACE, "animation_cycle_state.json")
+POSITIONS_FILE = os.path.join(WORKSPACE, "manual_badge_positions.json")
+
+def load_manual_positions():
+    default_positions = {
+        "1": 95,
+        "2": 130,
+        "3": 170,
+        "4": 90,
+        "5": 120,
+        "6": 1600,
+        "7": 120,
+        "8_1": 110,
+        "8_2": 250,
+        "9": 170,
+        "10": 1600,
+        "11_1": 120,
+        "11_2": 260,
+        "12": 160,
+        "13_1": 110,
+        "13_2": 250,
+        "14": 1600
+    }
+    if os.path.exists(POSITIONS_FILE):
+        try:
+            with open(POSITIONS_FILE, "r") as f:
+                saved = json.load(f)
+                default_positions.update(saved)
+        except Exception:
+            pass
+    return default_positions
 
 def get_latest_project_folder(root_dir):
     subdirs = [os.path.join(root_dir, d) for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, d))]
@@ -121,37 +151,24 @@ def main():
     
     print(f"Total Video Runtime: {total_duration:.2f} seconds ({int(total_duration * FPS)} frames)")
     
+    pos = load_manual_positions()
     # Configure scenes and badges positioned strictly on clean cream / negative background
     # (badge_name, y_center, enter_delay, exit_lead_time)
     scenes_cfg = [
-        # Scene 1: Welcome signboard is at y=800; top cream space (0-200)
-        {"badges": [("p2_b1.png", 95, 0.2, 0.25)]},
-        # Scene 2: Stomach layers starts at y=263; top cream space (0-263)
-        {"badges": [("p2_b2.png", 130, 0.2, 0.25)]},
-        # Scene 3: Nonstop digestion signboard at y=368; top cream space (0-368)
-        {"badges": [("p2_b3.png", 170, 0.2, 0.25)]},
-        # Scene 4: Backup System signboard at y=187; top cream space (0-187)
-        {"badges": [("p2_b4.png", 90, 0.2, 0.25)]},
-        # Scene 5: Inside Torso chalkboard starts at y=280; top cream space (0-280)
-        {"badges": [("p2_b5.png", 120, 0.2, 0.25)]},
-        # Scene 6: Simple Breakdown chalkboard at top; clean cream floor at bottom (1498-1899)
-        {"badges": [("p2_b6.png", 1600, 0.2, 0.25)]},
-        # Scene 7: Glycogen Battery sign starts at y=241; top cream space (0-241)
-        {"badges": [("p2_b7.png", 120, 0.2, 0.25)]},
-        # Scene 8: Cupboard starts at y=454; top cream space (0-454) for both chips
-        {"badges": [("p2_b8_1.png", 110, 0.2, 0.25), ("p2_b8_2.png", 250, 1.5, 0.25)]},
-        # Scene 9: Brain Ketone cutaway starts at y=434; top cream space (0-434)
-        {"badges": [("p2_b9.png", 170, 0.2, 0.25)]},
-        # Scene 10: Cell Autophagy sign at top; clean cream floor below table at bottom (1526-1899)
-        {"badges": [("p2_b10.png", 1600, 0.2, 0.25)]},
-        # Scene 11: Scale & Armchair starts at y=448; top cream space (0-448) for both badges
-        {"badges": [("p2_b11_1.png", 120, 0.2, 0.25), ("p2_b11_2.png", 260, 1.2, 0.25)]},
-        # Scene 12: Mitochondria starts at y=414; top cream space (58-414)
-        {"badges": [("p2_b12.png", 160, 0.2, 0.25)]},
-        # Scene 13: Repaired cell starts at y=343; top cream space (0-343) for both badges
-        {"badges": [("p2_b13_1.png", 110, 0.2, 0.25), ("p2_b13_2.png", 250, 1.0, 0.25)]},
-        # Scene 14: Outro chalkboard at top; clean cream floor at bottom (1492-1709)
-        {"badges": [("p2_b14.png", 1600, 0.2, 0.25)]},
+        {"badges": [("p2_b1.png", pos.get("1", 95), 0.2, 0.25)]},
+        {"badges": [("p2_b2.png", pos.get("2", 130), 0.2, 0.25)]},
+        {"badges": [("p2_b3.png", pos.get("3", 170), 0.2, 0.25)]},
+        {"badges": [("p2_b4.png", pos.get("4", 90), 0.2, 0.25)]},
+        {"badges": [("p2_b5.png", pos.get("5", 120), 0.2, 0.25)]},
+        {"badges": [("p2_b6.png", pos.get("6", 1600), 0.2, 0.25)]},
+        {"badges": [("p2_b7.png", pos.get("7", 120), 0.2, 0.25)]},
+        {"badges": [("p2_b8_1.png", pos.get("8_1", 110), 0.2, 0.25), ("p2_b8_2.png", pos.get("8_2", 250), 1.5, 0.25)]},
+        {"badges": [("p2_b9.png", pos.get("9", 170), 0.2, 0.25)]},
+        {"badges": [("p2_b10.png", pos.get("10", 1600), 0.2, 0.25)]},
+        {"badges": [("p2_b11_1.png", pos.get("11_1", 120), 0.2, 0.25), ("p2_b11_2.png", pos.get("11_2", 260), 1.2, 0.25)]},
+        {"badges": [("p2_b12.png", pos.get("12", 160), 0.2, 0.25)]},
+        {"badges": [("p2_b13_1.png", pos.get("13_1", 110), 0.2, 0.25), ("p2_b13_2.png", pos.get("13_2", 250), 1.0, 0.25)]},
+        {"badges": [("p2_b14.png", pos.get("14", 1600), 0.2, 0.25)]},
     ]
 
     out_mp4 = os.path.join(WORKSPACE, f"Fasting_Series_{style_idx+1}_{chosen_style}.mp4")

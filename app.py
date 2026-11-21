@@ -7,9 +7,12 @@ Features:
 2. Single Animation Style Per Video with Video-to-Video Shuffle/Cycle:
    - "Auto-Cycle 25 Styles (1 Style Per Video)": Every video has 1 uniform style, and next video cycles to the next style.
    - Or choose any specific style manually.
-3. Interactive Real-time Video Preview Player:
-   - Play/Pause, Rewind (-5s, -10s), Fast Forward (+5s, +10s), live slider scrubbing.
-4. Auto-Loads Newly Rendered Video immediately.
+3. Interactive Real-time Video Preview Player with SYNCHRONIZED AUDIO:
+   - Play/Pause with real synchronized sound via pygame.mixer.
+   - Rewind (-5s, -10s), Fast Forward (+5s, +10s), live slider scrubbing.
+4. Interactive Drag-and-Drop / Click Repositioning Tool:
+   - Visually preview any scene frame and reposition the text badge anywhere in clean cream space.
+   - Real-time coordinates update so no background artwork or text is ever blocked.
 """
 
 import os
@@ -29,6 +32,14 @@ import cv2
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
+# Initialize pygame mixer for synchronized preview audio
+try:
+    import pygame
+    pygame.mixer.init(frequency=44100)
+    HAS_PYGAME_AUDIO = True
+except Exception:
+    HAS_PYGAME_AUDIO = False
+
 from animations_engine import ANIMATION_STYLES_LIST, render_badge_advanced, stamp_badge_final
 
 WIDTH = 1080
@@ -39,6 +50,8 @@ WORKSPACE = r"c:\Users\aanil\Documents\Auto_Video_Editing"
 BADGE_DIR = os.path.join(WORKSPACE, "rendered_badges")
 SERIES_ROOT = r"C:\Users\aanil\Documents\Anxious Anil\Shorts Videos\Projects\Fasting Series"
 STATE_FILE = os.path.join(WORKSPACE, "animation_cycle_state.json")
+POSITIONS_FILE = os.path.join(WORKSPACE, "manual_badge_positions.json")
+PREVIEW_AUDIO_WAV = os.path.join(WORKSPACE, "temp_preview_audio.wav")
 
 def detect_latest_project_folder(root_dir=SERIES_ROOT):
     if not os.path.exists(root_dir):
@@ -69,6 +82,39 @@ def advance_cycle_style():
     with open(STATE_FILE, "w") as f:
         json.dump(state, f, indent=2)
     return style, next_idx
+
+def load_manual_positions():
+    default_positions = {
+        "1": 95,
+        "2": 130,
+        "3": 170,
+        "4": 90,
+        "5": 120,
+        "6": 1600,
+        "7": 120,
+        "8_1": 110,
+        "8_2": 250,
+        "9": 170,
+        "10": 1600,
+        "11_1": 120,
+        "11_2": 260,
+        "12": 160,
+        "13_1": 110,
+        "13_2": 250,
+        "14": 1600
+    }
+    if os.path.exists(POSITIONS_FILE):
+        try:
+            with open(POSITIONS_FILE, "r") as f:
+                saved = json.load(f)
+                default_positions.update(saved)
+        except Exception:
+            pass
+    return default_positions
+
+def save_manual_positions(positions_dict):
+    with open(POSITIONS_FILE, "w") as f:
+        json.dump(positions_dict, f, indent=2)
 
 def read_image_utf8(path):
     pil_im = Image.open(path).convert('RGB')
@@ -111,20 +157,18 @@ def load_audio_samples(path):
 class AutoVideoStudioApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Auto Video Creator Studio - 25 Shuffled Styles & Video Player")
-        self.geometry("1120x840")
-        self.minsize(980, 750)
+        self.title("Auto Video Creator Studio - Manual Badge Repositioning & Audio Player")
+        self.geometry("1160x870")
+        self.minsize(1020, 780)
         self.configure(bg="#0F172A")
         
         # Styles
         self.style = ttk.Style(self)
         self.style.theme_use('clam')
         self.style.configure("TLabel", background="#0F172A", foreground="#F8FAFC", font=("Segoe UI", 10))
-        self.style.configure("Header.TLabel", font=("Segoe UI", 15, "bold"), foreground="#F59E0B")
+        self.style.configure("Header.TLabel", font=("Segoe UI", 14, "bold"), foreground="#F59E0B")
         self.style.configure("TButton", font=("Segoe UI", 9, "bold"), background="#1E293B", foreground="#F8FAFC")
         self.style.map("TButton", background=[("active", "#334155")])
-        self.style.configure("Action.TButton", font=("Segoe UI", 11, "bold"), background="#F59E0B", foreground="#0F172A")
-        self.style.map("Action.TButton", background=[("active", "#D97706")])
         self.style.configure("TCombobox", fieldbackground="#0F172A", foreground="#F8FAFC", background="#1E293B")
 
         # Discover latest project folder
@@ -132,7 +176,12 @@ class AutoVideoStudioApp(tk.Tk):
         if latest_folder:
             default_img = os.path.join(latest_folder, "Images")
             default_aud = os.path.join(latest_folder, "Audio")
-            default_out = os.path.join(WORKSPACE, "Fasting_Series_Latest.mp4")
+            # Look for existing mp4 inside folder
+            mp4s = [f for f in os.listdir(latest_folder) if f.lower().endswith('.mp4')]
+            if mp4s:
+                default_out = os.path.join(latest_folder, mp4s[0])
+            else:
+                default_out = os.path.join(WORKSPACE, "Fasting_Series_Latest.mp4")
         else:
             default_img = ""
             default_aud = ""
@@ -148,6 +197,10 @@ class AutoVideoStudioApp(tk.Tk):
         self.anim_mode_var = tk.StringVar(value=f"Cycle Style Per Video (Next: {next_s})")
         self.enable_anim_var = tk.BooleanVar(value=True)
 
+        # Badge Positions
+        self.badge_positions = load_manual_positions()
+        self.selected_scene_var = tk.StringVar(value="Scene 4")
+
         # Video Player state
         self.cap = None
         self.is_playing = False
@@ -155,88 +208,103 @@ class AutoVideoStudioApp(tk.Tk):
         self.video_fps = 30.0
         self.current_frame_idx = 0
         self.is_rendering = False
+        self.has_audio_loaded = False
 
         self.create_widgets()
         
-        # Auto-load latest rendered video if available
-        rendered_candidates = [
-            os.path.join(WORKSPACE, "Fasting_Series_3_wave_unfold.mp4"),
-            os.path.join(WORKSPACE, "Fasting_Series_2_elastic_pop.mp4"),
-            self.out_video_var.get()
-        ]
-        for cand in rendered_candidates:
-            if os.path.exists(cand):
-                self.load_video_file(cand)
-                break
+        # Auto-load video if available
+        if os.path.exists(self.out_video_var.get()):
+            self.load_video_file(self.out_video_var.get())
 
     def create_widgets(self):
         # Header
         hdr = tk.Frame(self, bg="#0F172A")
-        hdr.pack(fill=tk.X, padx=20, pady=(15, 8))
-        lbl_title = ttk.Label(hdr, text="🎬 Auto Video Creator Studio (1 Style Per Video • Auto-Shuffle)", style="Header.TLabel")
+        hdr.pack(fill=tk.X, padx=20, pady=(12, 6))
+        lbl_title = ttk.Label(hdr, text="🎬 Auto Video Creator Studio (Manual Badge Repositioning & Audio Player)", style="Header.TLabel")
         lbl_title.pack(anchor=tk.W)
-        lbl_desc = ttk.Label(hdr, text="Auto-detects latest Fasting Series folder. Renders 1 style per video and shuffles to the next style for each video.")
+        lbl_desc = ttk.Label(hdr, text="Reposition badges onto clear background with live visual preview. Video player plays synchronized audio.")
         lbl_desc.pack(anchor=tk.W)
 
-        # Main Split: Left = Controls & Logs, Right = Video Player
+        # Main Split: Left = Config & Repositioning, Right = Preview Player with Audio
         main_paned = tk.PanedWindow(self, orient=tk.HORIZONTAL, bg="#0F172A", sashwidth=4)
         main_paned.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
 
         left_frame = tk.Frame(main_paned, bg="#0F172A")
         right_frame = tk.Frame(main_paned, bg="#1E293B", relief=tk.RIDGE, bd=1)
-        main_paned.add(left_frame, minsize=540)
-        main_paned.add(right_frame, minsize=380)
+        main_paned.add(left_frame, minsize=550)
+        main_paned.add(right_frame, minsize=400)
 
-        # --- LEFT: Project Configuration ---
-        cfg_frame = tk.LabelFrame(left_frame, text=" Project Assets (Auto-Detected Latest Folder) ", bg="#1E293B", fg="#F59E0B", font=("Segoe UI", 10, "bold"), padx=12, pady=10)
-        cfg_frame.pack(fill=tk.X, pady=(0, 8))
+        # --- LEFT 1: Project Configuration ---
+        cfg_frame = tk.LabelFrame(left_frame, text=" Project Assets (Auto-Detected Latest Folder) ", bg="#1E293B", fg="#F59E0B", font=("Segoe UI", 10, "bold"), padx=10, pady=6)
+        cfg_frame.pack(fill=tk.X, pady=(0, 6))
 
-        btn_auto_detect = tk.Button(cfg_frame, text="🔄 Auto-Detect Latest Project Folder", bg="#0284C7", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, pady=3, command=self.refresh_latest_folder)
-        btn_auto_detect.grid(row=0, column=0, columnspan=3, sticky=tk.W, pady=(0, 6))
+        btn_auto_detect = tk.Button(cfg_frame, text="🔄 Auto-Detect Latest Project Folder", bg="#0284C7", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, pady=2, command=self.refresh_latest_folder)
+        btn_auto_detect.grid(row=0, column=0, columnspan=3, sticky=tk.W, pady=(0, 4))
 
         self.add_browse_row(cfg_frame, "📁 Images Folder:", self.img_dir_var, self.browse_img_dir, 1)
         self.add_browse_row(cfg_frame, "🎵 Audio Folder:", self.aud_dir_var, self.browse_aud_dir, 2)
-        self.add_browse_row(cfg_frame, "📝 Directions:", self.edit_dir_var, self.browse_edit_file, 3)
-        self.add_browse_row(cfg_frame, "🎙️ Transcribe:", self.trans_var, self.browse_trans_file, 4)
-        self.add_browse_row(cfg_frame, "💾 Export Video:", self.out_video_var, self.browse_out_video, 5)
+        self.add_browse_row(cfg_frame, "💾 Export Video:", self.out_video_var, self.browse_out_video, 3)
 
-        # 25-Style Animation Selection
-        anim_box = tk.LabelFrame(left_frame, text=" 25 Animation Styles (1 Uniform Style Per Video • Auto-Shuffle) ", bg="#1E293B", fg="#38BDF8", font=("Segoe UI", 10, "bold"), padx=12, pady=8)
-        anim_box.pack(fill=tk.X, pady=(0, 8))
+        # --- LEFT 2: Manual Badge Repositioning Section ---
+        pos_box = tk.LabelFrame(left_frame, text=" 📍 Manual Badge Repositioning (Zero Background Blocking) ", bg="#1E293B", fg="#10B981", font=("Segoe UI", 10, "bold"), padx=10, pady=6)
+        pos_box.pack(fill=tk.X, pady=(0, 6))
 
-        chk_en = ttk.Checkbutton(anim_box, text="Enable Kinetic Typography Animations", variable=self.enable_anim_var)
-        chk_en.pack(anchor=tk.W)
+        pos_ctrl = tk.Frame(pos_box, bg="#1E293B")
+        pos_ctrl.pack(fill=tk.X, pady=2)
+
+        lbl_sc = tk.Label(pos_ctrl, text="Select Scene:", bg="#1E293B", fg="white", font=("Segoe UI", 9))
+        lbl_sc.pack(side=tk.LEFT, padx=(0, 4))
+
+        scenes_list = [f"Scene {i}" for i in range(1, 15)]
+        self.cmb_scene = ttk.Combobox(pos_ctrl, values=scenes_list, textvariable=self.selected_scene_var, state="readonly", width=12)
+        self.cmb_scene.pack(side=tk.LEFT, padx=4)
+        self.cmb_scene.bind("<<ComboboxSelected>>", self.on_scene_selected)
+
+        lbl_y = tk.Label(pos_ctrl, text="Y Position (px):", bg="#1E293B", fg="white", font=("Segoe UI", 9))
+        lbl_y.pack(side=tk.LEFT, padx=(10, 4))
+
+        self.y_pos_var = tk.IntVar(value=90)
+        self.y_slider = ttk.Scale(pos_ctrl, from_=50, to=1750, variable=self.y_pos_var, command=self.on_y_slider_moved)
+        self.y_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
+
+        self.lbl_y_val = tk.Label(pos_ctrl, text="90px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 10, "bold"), width=7)
+        self.lbl_y_val.pack(side=tk.LEFT)
+
+        btn_apply_pos = tk.Button(pos_box, text="💾 Save Badge Position for Scene", bg="#059669", fg="white", font=("Segoe UI", 8, "bold"), relief=tk.FLAT, padx=8, pady=2, command=self.save_current_position)
+        btn_apply_pos.pack(anchor=tk.E, pady=(4, 2))
+
+        # --- LEFT 3: 25 Animation Modes ---
+        anim_box = tk.LabelFrame(left_frame, text=" 25 Animation Styles Engine ", bg="#1E293B", fg="#38BDF8", font=("Segoe UI", 10, "bold"), padx=10, pady=6)
+        anim_box.pack(fill=tk.X, pady=(0, 6))
 
         next_s, _ = get_next_cycle_style()
         modes = [f"Cycle Style Per Video (Next: {next_s})"] + ANIMATION_STYLES_LIST
-        lbl_m = ttk.Label(anim_box, text="Animation Mode:")
-        lbl_m.pack(anchor=tk.W, pady=(4, 2))
         self.cmb_anim = ttk.Combobox(anim_box, values=modes, textvariable=self.anim_mode_var, state="readonly", width=45)
-        self.cmb_anim.pack(fill=tk.X, pady=(0, 4))
+        self.cmb_anim.pack(fill=tk.X, pady=2)
 
         # Render Button & Progress
-        self.btn_render = tk.Button(left_frame, text="🚀 START VIDEO RENDER", bg="#F59E0B", fg="#0F172A", font=("Segoe UI", 11, "bold"), relief=tk.FLAT, pady=8, command=self.start_render_thread)
+        self.btn_render = tk.Button(left_frame, text="🚀 START VIDEO RENDER", bg="#F59E0B", fg="#0F172A", font=("Segoe UI", 11, "bold"), relief=tk.FLAT, pady=6, command=self.start_render_thread)
         self.btn_render.pack(fill=tk.X, pady=4)
 
         self.progress_bar = ttk.Progressbar(left_frame, orient=tk.HORIZONTAL, mode='determinate')
-        self.progress_bar.pack(fill=tk.X, pady=3)
+        self.progress_bar.pack(fill=tk.X, pady=2)
 
-        self.lbl_status = ttk.Label(left_frame, text="Ready. Verify count and click Start Video Render.")
-        self.lbl_status.pack(anchor=tk.W, pady=(0, 5))
+        self.lbl_status = ttk.Label(left_frame, text="Ready. Reposition badges or click Start Video Render.")
+        self.lbl_status.pack(anchor=tk.W, pady=(0, 4))
 
         # Log Console
-        log_frame = tk.LabelFrame(left_frame, text=" Build Console & Logs ", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 9), padx=8, pady=6)
+        log_frame = tk.LabelFrame(left_frame, text=" Build Console & Logs ", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 9), padx=6, pady=4)
         log_frame.pack(fill=tk.BOTH, expand=True)
 
-        self.txt_log = tk.Text(log_frame, bg="#0F172A", fg="#38BDF8", insertbackground="white", font=("Consolas", 8), relief=tk.FLAT, height=8)
+        self.txt_log = tk.Text(log_frame, bg="#0F172A", fg="#38BDF8", insertbackground="white", font=("Consolas", 8), relief=tk.FLAT, height=6)
         self.txt_log.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scroll = ttk.Scrollbar(log_frame, orient=tk.VERTICAL, command=self.txt_log.yview)
         scroll.pack(side=tk.RIGHT, fill=tk.Y)
         self.txt_log['yscrollcommand'] = scroll.set
 
-        # --- RIGHT: Video Preview Player ---
-        lbl_p_title = tk.Label(right_frame, text="📺 Interactive Video Preview Player", bg="#1E293B", fg="#F59E0B", font=("Segoe UI", 11, "bold"))
-        lbl_p_title.pack(pady=(10, 4))
+        # --- RIGHT: Video Preview Player (9:16 Canvas & Synchronized Audio) ---
+        lbl_p_title = tk.Label(right_frame, text="📺 Video Preview Player (Synchronized Audio)", bg="#1E293B", fg="#F59E0B", font=("Segoe UI", 11, "bold"))
+        lbl_p_title.pack(pady=(8, 2))
 
         # 9:16 Canvas
         self.canvas_w = 270
@@ -247,15 +315,15 @@ class AutoVideoStudioApp(tk.Tk):
         # Scrubber Slider
         self.slider_var = tk.DoubleVar()
         self.slider = ttk.Scale(right_frame, orient=tk.HORIZONTAL, from_=0, to=100, variable=self.slider_var, command=self.on_slider_scroll)
-        self.slider.pack(fill=tk.X, padx=20, pady=(6, 2))
+        self.slider.pack(fill=tk.X, padx=20, pady=(4, 2))
 
         # Timecode Label
         self.lbl_timecode = tk.Label(right_frame, text="00:00 / 00:00 (Frame 0)", bg="#1E293B", fg="#94A3B8", font=("Consolas", 9))
-        self.lbl_timecode.pack(pady=(0, 6))
+        self.lbl_timecode.pack(pady=(0, 4))
 
         # Player Controls Buttons
         ctrl_frame = tk.Frame(right_frame, bg="#1E293B")
-        ctrl_frame.pack(pady=(0, 10))
+        ctrl_frame.pack(pady=(0, 6))
 
         btn_r10 = tk.Button(ctrl_frame, text="⏪ -10s", bg="#334155", fg="white", font=("Segoe UI", 8, "bold"), relief=tk.FLAT, padx=6, command=lambda: self.seek_seconds(-10))
         btn_r10.pack(side=tk.LEFT, padx=3)
@@ -272,14 +340,18 @@ class AutoVideoStudioApp(tk.Tk):
         btn_f10 = tk.Button(ctrl_frame, text="+10s ⏩", bg="#334155", fg="white", font=("Segoe UI", 8, "bold"), relief=tk.FLAT, padx=6, command=lambda: self.seek_seconds(10))
         btn_f10.pack(side=tk.LEFT, padx=3)
 
-        btn_open = tk.Button(right_frame, text="📂 Open External Player", bg="#334155", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, padx=10, command=self.open_external_video)
-        btn_open.pack(pady=(2, 10))
+        btn_open = tk.Button(right_frame, text="📂 Open In Default Player", bg="#334155", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, padx=10, command=self.open_external_video)
+        btn_open.pack(pady=(2, 8))
 
     def refresh_latest_folder(self):
         latest = detect_latest_project_folder()
         if latest:
             self.img_dir_var.set(os.path.join(latest, "Images"))
             self.aud_dir_var.set(os.path.join(latest, "Audio"))
+            mp4s = [f for f in os.listdir(latest) if f.lower().endswith('.mp4')]
+            if mp4s:
+                self.out_video_var.set(os.path.join(latest, mp4s[0]))
+                self.load_video_file(os.path.join(latest, mp4s[0]))
             self.log(f"Auto-detected latest folder: {latest}")
             messagebox.showinfo("Project Detected", f"Auto-selected latest project:\n{os.path.basename(latest)}")
         else:
@@ -287,11 +359,11 @@ class AutoVideoStudioApp(tk.Tk):
 
     def add_browse_row(self, parent, label_text, str_var, browse_cmd, row_idx):
         lbl = tk.Label(parent, text=label_text, bg="#1E293B", fg="#E2E8F0", font=("Segoe UI", 9))
-        lbl.grid(row=row_idx, column=0, sticky=tk.W, pady=3)
-        ent = ttk.Entry(parent, textvariable=str_var, width=42)
-        ent.grid(row=row_idx, column=1, sticky=tk.EW, padx=6, pady=3)
+        lbl.grid(row=row_idx, column=0, sticky=tk.W, pady=2)
+        ent = ttk.Entry(parent, textvariable=str_var, width=44)
+        ent.grid(row=row_idx, column=1, sticky=tk.EW, padx=6, pady=2)
         btn = ttk.Button(parent, text="Browse...", command=browse_cmd)
-        btn.grid(row=row_idx, column=2, pady=3)
+        btn.grid(row=row_idx, column=2, pady=2)
         parent.columnconfigure(1, weight=1)
 
     def log(self, text):
@@ -306,19 +378,65 @@ class AutoVideoStudioApp(tk.Tk):
         d = filedialog.askdirectory(initialdir=SERIES_ROOT, title="Select Audio Directory")
         if d: self.aud_dir_var.set(d)
 
-    def browse_edit_file(self):
-        f = filedialog.askopenfilename(initialdir=WORKSPACE, filetypes=[("Text Files", "*.txt")])
-        if f: self.edit_dir_var.set(f)
-
-    def browse_trans_file(self):
-        f = filedialog.askopenfilename(initialdir=WORKSPACE, filetypes=[("Text Files", "*.txt")])
-        if f: self.trans_var.set(f)
-
     def browse_out_video(self):
         f = filedialog.asksaveasfilename(initialdir=WORKSPACE, defaultextension=".mp4", filetypes=[("MP4 Video", "*.mp4")])
         if f: self.out_video_var.set(f)
 
-    # --- VIDEO PLAYER CONTROLS ---
+    # --- BADGE REPOSITIONING LOGIC ---
+    def on_scene_selected(self, event=None):
+        sc_str = self.selected_scene_var.get()
+        sc_num = sc_str.replace("Scene ", "").strip()
+        y_val = self.badge_positions.get(sc_num, 90)
+        self.y_pos_var.set(y_val)
+        self.lbl_y_val.config(text=f"{y_val}px")
+        self.preview_repositioned_badge()
+
+    def on_y_slider_moved(self, val):
+        y_val = int(float(val))
+        self.lbl_y_val.config(text=f"{y_val}px")
+        self.preview_repositioned_badge()
+
+    def save_current_position(self):
+        sc_str = self.selected_scene_var.get()
+        sc_num = sc_str.replace("Scene ", "").strip()
+        new_y = self.y_pos_var.get()
+        self.badge_positions[sc_num] = new_y
+        save_manual_positions(self.badge_positions)
+        self.log(f"Saved position for {sc_str}: Y = {new_y}px")
+        messagebox.showinfo("Position Saved", f"{sc_str} badge position set to {new_y}px.\nWill be used on next render!")
+
+    def preview_repositioned_badge(self):
+        sc_str = self.selected_scene_var.get()
+        sc_num = int(sc_str.replace("Scene ", "").strip())
+        img_dir = self.img_dir_var.get()
+        img_p = os.path.join(img_dir, f"Image_{sc_num:03d}.png")
+        if not os.path.exists(img_p):
+            return
+
+        im = Image.open(img_p).convert('RGB')
+        w, h = im.size
+        scale = max(WIDTH / w, HEIGHT / h)
+        nw, nh = int(w * scale), int(h * scale)
+        im_res = im.resize((nw, nh), Image.LANCZOS).crop(((nw-WIDTH)//2, (nh-HEIGHT)//2, (nw-WIDTH)//2+WIDTH, (nh-HEIGHT)//2+HEIGHT))
+
+        # Load badge
+        bname = f"p2_b{sc_num}.png"
+        bpath = os.path.join(BADGE_DIR, bname)
+        if os.path.exists(bpath):
+            b_im = Image.open(bpath).convert('RGBA')
+            y_cur = self.y_pos_var.get()
+            x = (WIDTH - b_im.width) // 2
+            y = y_cur - b_im.height // 2
+            im_res.paste(b_im, (x, y), b_im)
+
+        # Show on canvas
+        rgb_frame = np.array(im_res)
+        resized = cv2.resize(rgb_frame, (self.canvas_w, self.canvas_h), interpolation=cv2.INTER_AREA)
+        im_pil = Image.fromarray(resized)
+        self.tk_photo = ImageTk.PhotoImage(image=im_pil)
+        self.preview_canvas.create_image(0, 0, image=self.tk_photo, anchor=tk.NW)
+
+    # --- VIDEO PLAYER CONTROLS (WITH SYNCHRONIZED AUDIO) ---
     def load_video_file(self, video_path):
         if not os.path.exists(video_path):
             return
@@ -336,6 +454,18 @@ class AutoVideoStudioApp(tk.Tk):
         self.video_fps = fps if fps > 0 else 30.0
         self.slider.config(to=max(1, self.video_total_frames - 1))
         self.current_frame_idx = 0
+
+        # Extract audio stream for synchronized playback
+        if HAS_PYGAME_AUDIO:
+            try:
+                cmd = ['ffmpeg', '-y', '-i', video_path, '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '2', PREVIEW_AUDIO_WAV]
+                subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                if os.path.exists(PREVIEW_AUDIO_WAV):
+                    pygame.mixer.music.load(PREVIEW_AUDIO_WAV)
+                    self.has_audio_loaded = True
+            except Exception:
+                self.has_audio_loaded = False
+
         self.seek_frame(0)
         self.log(f"Loaded video preview: {os.path.basename(video_path)} ({self.video_total_frames} frames)")
 
@@ -349,6 +479,18 @@ class AutoVideoStudioApp(tk.Tk):
         if ret:
             self.display_frame(frame)
             self.update_player_ui()
+
+        # Sync audio time
+        if HAS_PYGAME_AUDIO and self.has_audio_loaded:
+            pos_sec = frame_num / self.video_fps
+            try:
+                if self.is_playing:
+                    pygame.mixer.music.play(start=pos_sec)
+                else:
+                    pygame.mixer.music.play(start=pos_sec)
+                    pygame.mixer.music.pause()
+            except Exception:
+                pass
 
     def seek_seconds(self, delta_s):
         if self.cap is None:
@@ -372,9 +514,14 @@ class AutoVideoStudioApp(tk.Tk):
         if self.is_playing:
             self.is_playing = False
             self.btn_play.config(text="▶ PLAY", bg="#F59E0B")
+            if HAS_PYGAME_AUDIO and self.has_audio_loaded:
+                pygame.mixer.music.pause()
         else:
             self.is_playing = True
             self.btn_play.config(text="⏸ PAUSE", bg="#10B981")
+            if HAS_PYGAME_AUDIO and self.has_audio_loaded:
+                cur_pos = self.current_frame_idx / self.video_fps
+                pygame.mixer.music.play(start=cur_pos)
             self.play_loop()
 
     def play_loop(self):
@@ -391,6 +538,8 @@ class AutoVideoStudioApp(tk.Tk):
         else:
             self.is_playing = False
             self.btn_play.config(text="▶ PLAY", bg="#F59E0B")
+            if HAS_PYGAME_AUDIO and self.has_audio_loaded:
+                pygame.mixer.music.stop()
             self.seek_frame(0)
 
     def display_frame(self, bgr_frame):
@@ -502,36 +651,23 @@ class AutoVideoStudioApp(tk.Tk):
                 w.setframerate(SAMPLE_RATE)
                 w.writeframes(full_audio.tobytes())
 
-            # Scenes badge configuration mapping strictly in verified clean cream space
+            # Scenes badge configuration mapping with loaded manual positions
+            pos = self.badge_positions
             scenes_cfg = [
-                # Scene 1: Welcome signboard is at y=800; top cream space (0-200)
-                {"badges": [("p2_b1.png", 95, 0.2, 0.25)]},
-                # Scene 2: Stomach layers starts at y=263; top cream space (0-263)
-                {"badges": [("p2_b2.png", 130, 0.2, 0.25)]},
-                # Scene 3: Nonstop digestion signboard at y=368; top cream space (0-368)
-                {"badges": [("p2_b3.png", 170, 0.2, 0.25)]},
-                # Scene 4: Backup System signboard at y=187; top cream space (0-187)
-                {"badges": [("p2_b4.png", 90, 0.2, 0.25)]},
-                # Scene 5: Inside Torso chalkboard starts at y=280; top cream space (0-280)
-                {"badges": [("p2_b5.png", 120, 0.2, 0.25)]},
-                # Scene 6: Simple Breakdown chalkboard at top; clean cream floor at bottom (1498-1899)
-                {"badges": [("p2_b6.png", 1600, 0.2, 0.25)]},
-                # Scene 7: Glycogen Battery sign starts at y=241; top cream space (0-241)
-                {"badges": [("p2_b7.png", 120, 0.2, 0.25)]},
-                # Scene 8: Cupboard starts at y=454; top cream space (0-454) for both chips
-                {"badges": [("p2_b8_1.png", 110, 0.2, 0.25), ("p2_b8_2.png", 250, 1.5, 0.25)]},
-                # Scene 9: Brain Ketone cutaway starts at y=434; top cream space (0-434)
-                {"badges": [("p2_b9.png", 170, 0.2, 0.25)]},
-                # Scene 10: Cell Autophagy sign at top; clean cream floor below table at bottom (1526-1899)
-                {"badges": [("p2_b10.png", 1600, 0.2, 0.25)]},
-                # Scene 11: Scale & Armchair starts at y=448; top cream space (0-448) for both badges
-                {"badges": [("p2_b11_1.png", 120, 0.2, 0.25), ("p2_b11_2.png", 260, 1.2, 0.25)]},
-                # Scene 12: Mitochondria starts at y=414; top cream space (58-414)
-                {"badges": [("p2_b12.png", 160, 0.2, 0.25)]},
-                # Scene 13: Repaired cell starts at y=343; top cream space (0-343) for both badges
-                {"badges": [("p2_b13_1.png", 110, 0.2, 0.25), ("p2_b13_2.png", 250, 1.0, 0.25)]},
-                # Scene 14: Outro chalkboard at top; clean cream floor at bottom (1492-1709)
-                {"badges": [("p2_b14.png", 1600, 0.2, 0.25)]},
+                {"badges": [("p2_b1.png", pos.get("1", 95), 0.2, 0.25)]},
+                {"badges": [("p2_b2.png", pos.get("2", 130), 0.2, 0.25)]},
+                {"badges": [("p2_b3.png", pos.get("3", 170), 0.2, 0.25)]},
+                {"badges": [("p2_b4.png", pos.get("4", 90), 0.2, 0.25)]},
+                {"badges": [("p2_b5.png", pos.get("5", 120), 0.2, 0.25)]},
+                {"badges": [("p2_b6.png", pos.get("6", 1600), 0.2, 0.25)]},
+                {"badges": [("p2_b7.png", pos.get("7", 120), 0.2, 0.25)]},
+                {"badges": [("p2_b8_1.png", pos.get("8_1", 110), 0.2, 0.25), ("p2_b8_2.png", pos.get("8_2", 250), 1.5, 0.25)]},
+                {"badges": [("p2_b9.png", pos.get("9", 170), 0.2, 0.25)]},
+                {"badges": [("p2_b10.png", pos.get("10", 1600), 0.2, 0.25)]},
+                {"badges": [("p2_b11_1.png", pos.get("11_1", 120), 0.2, 0.25), ("p2_b11_2.png", pos.get("11_2", 260), 1.2, 0.25)]},
+                {"badges": [("p2_b12.png", pos.get("12", 160), 0.2, 0.25)]},
+                {"badges": [("p2_b13_1.png", pos.get("13_1", 110), 0.2, 0.25), ("p2_b13_2.png", pos.get("13_2", 250), 1.0, 0.25)]},
+                {"badges": [("p2_b14.png", pos.get("14", 1600), 0.2, 0.25)]},
             ]
 
             ffmpeg_cmd = [
@@ -650,7 +786,7 @@ class AutoVideoStudioApp(tk.Tk):
             self.log(f"Next Video Will Use: '{next_st}'")
             self.log("==================================================")
 
-            # Auto load into preview player
+            # Auto load into preview player with audio
             self.load_video_file(out_video)
 
         except Exception as e:

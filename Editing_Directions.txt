@@ -1,147 +1,164 @@
-**Global Text UI Style Guide (Zero White Text, No Extra Sounds)**
+PART 1: EDITING DIRECTIONS
+Global Text UI Style Guide
 
-* **Font:** Bold Rounded Sans-Serif (Noto Sans Telugu Bold + Montserrat ExtraBold).
-* **Text Colors:** Deep Navy Blue (`#1B2A4A`) for primary text; Warm Terracotta Orange (`#C84B28`) for myth-busting/alerts. Never use white text.
-* **UI Box Style:** Rounded pill/card (Corner Radius: `16px`), `3px` solid `#1B2A4A` border, and a hard flat drop shadow (`X: 5px, Y: 5px, Blur: 0px, Color: #1B2A4A`).
+Font: Extra-Bold Rounded Sans-Serif (e.g., Noto Sans Telugu Bold + Montserrat ExtraBold for English words)
 
----
+Primary Text Color: Deep Navy (#1B2A4A)
 
-**1. Image 1 — Intro (Welcome)**
+Alert / Shock Text Color: Terracotta Orange (#D95D39)
 
-* **Entry Transition:** Quick Zoom-In Reveal (`0.2s`, `95% → 100%`) from a clean Cream (`#FFF8E7`) frame.
-* **Image Motion:** Continuous gentle zoom-in (`100% → 106%`) focused on the waving stickman and the "HELLO!" signboard.
-* **Text & UI Box:** `"SUPER INTERESTING TOPIC!"`
-* **UI:** Mustard Yellow (`#F4C430`) pill badge, Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
+UI Box Style: Pill or rounded card (14px corner radius), 3px solid Deep Navy (#1B2A4A) border, flat hard drop shadow (4px 4px 0px #1B2A4A), background fills strictly from Mustard Yellow (#E8B931), soft off-white (#FAF6F0), or Sage Green (#5B8C5A). ZERO white text anywhere.
 
+1. Image 1 — Intro
+Entry Transition: Smooth Zoom-In Fade (0.20s)
 
-* **Text Animation:** Elastic Pop-In (`0% → 110% → 100%`) at top-center → gentle float → Quick Slide-Left Exit (`0.15s`).
+Image Motion: Slow continuous Zoom-In (100% → 104%)
 
-**2. Image 2 — Hook (Empty Plate & Stomach Layers)**
+Text & UI Box: "Welcome Back! 👋"
 
-* **Entry Transition:** Fast Whip-Slide Left (`0.15s`) with horizontal motion blur.
-* **Image Motion:** Slow zoom-in toward the empty plate and the three-layer stomach cutaway.
-* **Text & UI Box:** `"FASTING = ఆకలితో ఉండటమా?"`
-* **UI:** Mustard Yellow (`#F4C430`) pill badge, Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
+UI: Mustard Yellow (#E8B931) pill, Deep Navy (#1B2A4A) text, 3px Deep Navy border + flat hard shadow
 
+Text Animation: Pop-Bounce In (0.20s) → Subtle gentle float synced to "Hey guys" → Quick Slide-Up Out (0.15s)
 
-* **Text Animation:** Elastic Scale-Up → slight pulse on `"ఆకలితో ఉండటమా?"` → Quick Slide-Up Fade (`0.15s`).
+2. Image 2 — Hook
+Entry Transition: Fast Whip-Slide Left (0.15s)
 
-**3. Image 3 — Curiosity 1 (Nonstop Eating & Tiffin Boxes)**
+Image Motion: Continuous Zoom-In (100% → 105%) toward the stick-figure's stop gesture
 
-* **Entry Transition:** Push-Up Slide (`0.2s`) — pushes Image 2 off the top edge.
-* **Image Motion:** Slow pan left-to-right across the three stacked tiffin boxes and digestive tract cutaway.
-* **Text & UI Box:** `"TIFFIN ➔ LUNCH ➔ DINNER"`
-* **UI:** Soft Sage Green (`#D8E8D4`) stacked sticky-note box, Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
+Text & UI Box: "ఆకలితో ఉండటమే Fasting ఆ?"
 
+UI: Off-White (#FAF6F0) card, Terracotta Orange (#D95D39) text for "Fasting", Deep Navy (#1B2A4A) for Telugu words, 3px Deep Navy border + flat shadow
 
-* **Text Animation:** Typewriter Reveal (word-by-word) → pop a Warm Terracotta (`#C84B28`) `"NO BREAK!"` mini-tag beside it → Fast Wipe-Left (`0.15s`).
+Text Animation: Stamp-Slam In (0.15s) → Micro-pulse on "అసలు కథ వేరే ఉంది" → Fast Fade-Scale Out (0.12s)
 
-**4. Image 4 — Curiosity 2 (16-Hour Secret Backup Switch)**
+3. Image 3 — Curiosity 1
+Entry Transition: Crisp Slide-Up (0.18s)
 
-* **Entry Transition:** Snap Zoom-In Cut (`0.1s`) on `"14 నుండి 16 గంటలు"`.
-* **Image Motion:** 2-frame micro-shake on entry, then slow zoom toward the `16 HRS` timer and mechanical toggle switch.
-* **Text & UI Box:** `"16 HRS = BACKUP SYSTEM ON!"`
-* **UI:** Cream Paper (`#FFF8E7`) alert banner with a thick Warm Terracotta (`#C84B28`) border and Warm Terracotta (`#C84B28`) bold text.
+Image Motion: Gentle Pan Right (0% → 4%) across the dining table to the stomach cutaway
 
+Text & UI Box: "Digestive Systemకి Rest ఏదీ?"
 
-* **Text Animation:** Slam-Down Drop (`150% → 100%`) → 2-frame horizontal jitter → Glitch-Out Dissolve (`0.1s`).
+UI: Mustard Yellow (#E8B931) card, Deep Navy (#1B2A4A) text, 3px Deep Navy border + flat shadow
 
-**5. Image 5 — Explanation Setup (Chalkboard & Magnifying Glass)**
+Text Animation: Slide-In Left (0.18s) → Steady hold with slight 2% scale-up on "అస్సలు Rest" → Quick Wipe Out (0.15s)
 
-* **Entry Transition:** Zoom-Out Reveal (`0.2s`) pulling back from the switch to the chalkboard torso.
-* **Image Motion:** Gentle upward tilt toward the magnifying glass and upper abdomen cutaway.
-* **Text & UI Box:** `"BODY లోపల ఏం జరుగుతుంది?"`
-* **UI:** Mustard Yellow (`#F4C430`) lower-third ribbon, Deep Navy (`#1B2A4A`) text, plus three Deep Navy `"?"` icons floating above.
+4. Image 4 — Curiosity 2
+Entry Transition: Fast Whip-Zoom In (0.15s)
 
+Image Motion: Continuous Zoom-In (100% → 105%) toward the switch panel
 
-* **Text Animation:** Slide-Up from bottom mask (`0.2s`) → gentle bob on `"?"` icons → Scale-Down Pop (`100% → 0%`) in `0.15s`.
+Text & UI Box: "Body Panic అవ్వదు — Backup Mode ON!"
 
-**6. Image 6 — Answer-Bridge (3-Step Staircase)**
+UI: Off-White (#FAF6F0) card, Terracotta Orange (#D95D39) for "Backup Mode ON!", Deep Navy (#1B2A4A) for rest, 3px Deep Navy border + flat shadow
 
-* **Entry Transition:** Paper-Swipe Left (`0.15s`) horizontal page turn.
-* **Image Motion:** Punch-in zoom (`100% → 108%`) toward the three-step staircase and spiral notebook.
-* **Text & UI Box:** `"STEP BY STEP SCIENCE 👇"`
-* **UI:** Soft Sage Green (`#D8E8D4`) capsule pill, Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
+Text Animation: Pop-In (0.15s) → Quick highlight bump on "Backup Mode" → Slide-Out Right (0.15s)
 
+5. Image 5 — Explanation Setup (Question)
+Entry Transition: Clean Horizontal Wipe Left (0.18s)
 
-* **Text Animation:** Slide-In from Left with overshoot bounce → downward bounce on `👇` → Slide-Out Right (`0.15s`).
+Image Motion: Slow Continuous Zoom-Out (104% → 100%)
 
-**7. Image 7 — Explanation 1 (Phone Battery & Liver Glycogen)**
+Text & UI Box: "తినడం ఆపితే లోపల ఏం జరుగుతుంది?"
 
-* **Entry Transition:** Center Split-Wipe (`0.2s`) opening from the middle.
-* **Image Motion:** Slow pan from the smartphone battery icon across to the liver glycogen cutaway.
-* **Text & UI Box:** `"GLYCOGEN = PHONE BATTERY 🔋"`
-* **UI:** Mustard Yellow (`#F4C430`) top card with Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
+UI: Mustard Yellow (#E8B931) pill, Deep Navy (#1B2A4A) text, 3px Deep Navy border + flat shadow
 
+Text Animation: Type-Pop In (0.20s) → Gentle bob synced to "నిజంగా ఏం జరుగుతుంది?" → Fast Fade Out (0.12s)
 
-* **Text Animation:** Pop-In over the smartphone → subtle pulse on `🔋` → Slide-Down Fade (`0.15s`).
+6. Image 6 — Answer-Bridge
+Entry Transition: Snappy Zoom-Punch (0.12s)
 
-**8. Image 8 — Explanation 2 (Cupboard Key & Fat Cell)**
+Image Motion: Continuous Pan Up (0% → 3%)
 
-* **Entry Transition:** Push-Right Slide (`0.2s`) sweeping in from the left.
-* **Image Motion:** Gentle pan from the brass cupboard key to the opening fat cell cross-section.
-* **Text & UI Box:** `"INSULIN ⬇️"` → `"FAT CELLS OPEN 🔑"`
-* **UI:** Left chip in Cream (`#FFF8E7`) with Deep Navy text; right badge in Mustard Yellow (`#F4C430`) with Deep Navy text, `3px` Navy border + hard shadow.
+Text & UI Box: "Simpleగా Break Down చేద్దాం!"
 
+UI: Sage Green (#5B8C5A) card, Deep Navy (#1B2A4A) text, 3px Deep Navy border + flat shadow
 
-* **Text Animation:** Pop left chip → `1.5s` later pop right badge over the fat cell → subtle scale pulse on `🔑` → Cross-Fade Out (`0.15s`).
+Text Animation: Slide-Up In (0.15s) → Crisp hold on "అసలు Science" → Slide-Down Out (0.12s)
 
-**9. Image 9 — Explanation 3 (Home Inverter & Brain Ketones)**
+7. Image 7 — Explanation 1 (Glucose / Phone Charger)
+Entry Transition: Fast Whip-Slide Left (0.15s)
 
-* **Entry Transition:** Fast Whip-Slide Up (`0.15s`) with vertical motion blur.
-* **Image Motion:** Slow zoom-in from the home inverter box up to the glowing ketone pathways in the brain.
-* **Text & UI Box:** `"KETONES = BRAIN INVERTER ⚡"`
-* **UI:** Soft Sage Green (`#D8E8D4`) pill badge with Deep Navy (`#1B2A4A`) text and `"KETONES"` highlighted in Warm Terracotta (`#C84B28`).
+Image Motion: Continuous Zoom-In (100% → 104%) toward the battery & vessel cutaway
 
+Text & UI Box: "Glucose = Direct Phone Charger"
 
-* **Text Animation:** Rise-Up Fade (moves up `30px`) → gentle upward float → Zoom-In Fade Out (`0.15s`).
+UI: Off-White (#FAF6F0) card, Terracotta Orange (#D95D39) for "Glucose", Deep Navy (#1B2A4A) for rest, 3px Deep Navy border + flat shadow
 
-**10. Image 10 — Explanation 4 (Clean Kitchen & Cell Autophagy)**
+Text Animation: Pop-In (0.15s) → Subtle pulse on "Direct Current" → Quick Slide-Left Out (0.15s)
 
-* **Entry Transition:** Zoom-Through Transition (`0.2s`) into the cell, emerging at the clean kitchen counter.
-* **Image Motion:** Slow pan across the swept kitchen counter up to the lysosome cleanup diagram.
-* **Text & UI Box:** `"AUTOPHAGY = CELL CLEANUP 🧹"`
-* **UI:** Cream Paper (`#FFF8E7`) top bar with Deep Navy (`#1B2A4A`) text and a Soft Sage Green underline, `3px` Navy border + hard shadow.
+8. Image 8 — Explanation 2 (Stored Fat / Fridge)
+Entry Transition: Fast Whip-Slide Left (0.15s)
 
+Image Motion: Continuous Pan Left (0% → 4%) from the fridge to the fat cell macro
 
-* **Text Animation:** Wipe-Right Reveal (`0.2s`) → gentle side-to-side wiggle on `🧹` → Split-Fade Out (`0.15s`).
+Text & UI Box: "10–12 Hours తర్వాత: Fat Fuel Mode"
 
-**11. Image 11 — Explanation Closer (Armchair & Balance Scale)**
+UI: Mustard Yellow (#E8B931) card, Deep Navy (#1B2A4A) text, 3px Deep Navy border + flat shadow
 
-* **Entry Transition:** Smooth Slide-Left (`0.2s`) settling onto the armchair and balance scale.
-* **Image Motion:** Slow zoom-in (`100% → 105%`) centering on the balanced scale comparing Fasting and Starvation.
-* **Text & UI Box:** `"FASTING ≠ STARVATION"` → `"PLANNED REST ⚖️"`
-* **UI:** Top card in Cream (`#FFF8E7`) with Warm Terracotta (`#C84B28`) bold text; bottom pill in Soft Sage Green (`#D8E8D4`) with Deep Navy (`#1B2A4A`) text.
+Text Animation: Slide-In Right (0.18s) → Scale-bump on "Fatని Fuelగా" → Fast Fade Out (0.12s)
 
+9. Image 9 — Explanation 3 (Insulin / Water Tank Tap)
+Entry Transition: Crisp Slide-Up (0.18s)
 
-* **Text Animation:** Pop top card → `1.2s` later Slide-Up bottom pill underneath → Clean Wipe-Left (`0.15s`).
+Image Motion: Continuous Zoom-In (100% → 105%) toward the valve and pipe cross-section
 
-**12. Image 12 — Payoff Setup (Glowing Silhouette & Mitochondrion)**
+Text & UI Box: "Insulin Down = Fat Unlock Signal"
 
-* **Entry Transition:** Smooth Slide-Down (`0.25s`) easing into the glowing silhouette.
-* **Image Motion:** Slow, tight zoom-in on the glowing mitochondrion energy sparks.
-* **Text & UI Box:** `"BODY WEAK అవ్వదు!"`
-* **UI:** Minimal Soft Sage Green (`#D8E8D4`) clean bar, Deep Navy (`#1B2A4A`) text, thin `2px` Navy border.
+UI: Off-White (#FAF6F0) card, Terracotta Orange (#D95D39) for "Insulin Down", Deep Navy (#1B2A4A) for rest, 3px Deep Navy border + flat shadow
 
+Text Animation: Pop-Bounce In (0.15s) → Subtle dip motion on "తగ్గిపోతుంది" → Quick Wipe Out (0.15s)
 
-* **Text Animation:** Slow Fade-In + gentle Drop-Down (`0.35s`) → calm, steady hold → Instant Snap-Cut.
+10. Image 10 — Explanation 4 (Autophagy / Dustbin)
+Entry Transition: Fast Whip-Zoom In (0.15s)
 
-**13. Image 13 — Payoff Punch Line (Toolbox & Repaired Cell)**
+Image Motion: Continuous Zoom-In (100% → 105%) into the cell cleaning macro
 
-* **Entry Transition:** Explosive Zoom-Out Snap (`0.1s`) bursting into the celebrating stickman and shining toolbox.
-* **Image Motion:** Quick `110% → 100%` punch-back, then slow zoom-in on the repaired healthy cell.
-* **Text & UI Box:** `"ఆకలి కాదు..."` → `"ULTIMATE REPAIR MODE! 🛠️"`
-* **UI:** Line 1 in Cream (`#FFF8E7`) box with Deep Navy text + bold Warm Terracotta strike-through; Line 2 in a big Mustard Yellow (`#F4C430`) hero box with Deep Navy (`#1B2A4A`) text and heavy `4px` Navy border.
+Text & UI Box: "16 Hours: Autophagy Cleaning!"
 
+UI: Mustard Yellow (#E8B931) card, Terracotta Orange (#D95D39) for "Autophagy", Deep Navy (#1B2A4A) for rest, 3px Deep Navy border + flat shadow
 
-* **Text Animation:** Pop Line 1 + animated strike-through → kinetic word-by-word Pop-In for Line 2 → bold scale-pulse → Clean Wipe-Left (`0.2s`).
+Text Animation: Stamp-In (0.15s) → Micro-pulse on "Recycle చేసుకుంటుంది" → Fast Slide-Out Left (0.15s)
 
-**14. Image 14 — Outro CTA (Signboard)**
+11. Image 11 — Explanation Closer
+Entry Transition: Smooth Cross-Slide Right (0.20s)
 
-* **Entry Transition:** Clean Slide-Left (`0.2s`) settling smoothly onto the Outro signboard.
-* **Image Motion:** Very slow zoom-in (`100% → 103%`) keeping the signboard payoff text crisp and readable.
-* **Text & UI Box:** `"SUBSCRIBE & COMMENT 👇"`
-* **UI:** Compact Mustard Yellow (`#F4C430`) CTA button pill in the lower-third safe zone, Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
+Image Motion: Slow Continuous Zoom-Out (104% → 100%)
 
+Text & UI Box: "Starvation కాదు — Controlled Break"
 
-* **Text Animation:** Bouncy Pop-Up in the final 3 seconds → gentle bounce on `👇` → Hold until smooth fade to black (`0.3s`).
+UI: Sage Green (#5B8C5A) card, Deep Navy (#1B2A4A) text, 3px Deep Navy border + flat shadow
+
+Text Animation: Fade-Rise In (0.18s) → Calm hold on "Natural Repair System" → Smooth Fade Out (0.15s)
+
+12. Image 12 — Payoff Setup
+Entry Transition: Gentle Dissolve-Zoom (0.25s)
+
+Image Motion: Very slow Continuous Pan Right (0% → 3%) across the sleeping scene
+
+Text & UI Box: "నిద్రలోనూ చిన్న Fasting జరుగుతుంది..."
+
+UI: Off-White (#FAF6F0) pill, Deep Navy (#1B2A4A) text, 3px Deep Navy border + flat shadow
+
+Text Animation: Slow Fade-In (0.25s) → Steady hold synced to "సరిగ్గా అర్థం చేసుకుంటే" → Quick Cut Out (0.10s)
+
+13. Image 13 — Payoff Punch Line
+Entry Transition: High-Energy Zoom-Punch (0.12s)
+
+Image Motion: Continuous Zoom-In (100% → 105%) toward the energized stick-figure
+
+Text & UI Box: "FREE CLEANING BREAK!"
+
+UI: Mustard Yellow (#E8B931) bold badge, Terracotta Orange (#D95D39) text, 3px Deep Navy (#1B2A4A) border + flat shadow
+
+Text Animation: Big Pop-Slam In (0.15s) → Energetic bounce hold on "FREE CLEANING BREAK!" → Fast Scale-Out (0.15s)
+
+14. Image 14 — Outro
+Entry Transition: Smooth Slide-Up (0.20s)
+
+Image Motion: Slow Continuous Zoom-Out (103% → 100%) to frame the full banner
+
+Text & UI Box: "Subscribe & Comment Below!"
+
+UI: Off-White (#FAF6F0) pill placed above the bottom 25% safe zone, Deep Navy (#1B2A4A) text, 3px Deep Navy border + flat shadow
+
+Text Animation: Pop-Bounce In (0.20s) → Gentle pulse on "subscribe చేసుకోండి" → Hold to end
