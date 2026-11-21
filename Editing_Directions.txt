@@ -1,157 +1,147 @@
 **Global Text UI Style Guide (Zero White Text, No Extra Sounds)**
 
-* **Font:** Bold Rounded Sans-Serif (*Noto Sans Telugu Bold* + *Montserrat ExtraBold*).
-* **Text Colors:** **Deep Navy Blue (`#1B2A4A`)** for primary text; **Warm Terracotta Orange (`#C84B28`)** for myth-busting/alerts. Never use white text.
-* **UI Box Style:** Rounded pill/card (`Corner Radius: 16px`), **3px solid `#1B2A4A` border**, and a **hard flat drop shadow** (`X: 5px, Y: 5px, Blur: 0px, Color: #1B2A4A`).
+* **Font:** Bold Rounded Sans-Serif (Noto Sans Telugu Bold + Montserrat ExtraBold).
+* **Text Colors:** Deep Navy Blue (`#1B2A4A`) for primary text; Warm Terracotta Orange (`#C84B28`) for myth-busting/alerts. Never use white text.
+* **UI Box Style:** Rounded pill/card (Corner Radius: `16px`), `3px` solid `#1B2A4A` border, and a hard flat drop shadow (`X: 5px, Y: 5px, Blur: 0px, Color: #1B2A4A`).
 
 ---
 
-### 1. Image 1 — Intro (Welcome)
+**1. Image 1 — Intro (Welcome)**
 
-* **Entry Transition:** **Quick Zoom-In Reveal** (0.2s, 95% → 100%) from a clean Cream (`#FFF8E7`) frame.
-* **Image Motion:** Continuous gentle zoom-in (100% → 106%) focused on the waving stickman.
+* **Entry Transition:** Quick Zoom-In Reveal (`0.2s`, `95% → 100%`) from a clean Cream (`#FFF8E7`) frame.
+* **Image Motion:** Continuous gentle zoom-in (`100% → 106%`) focused on the waving stickman and the "HELLO!" signboard.
 * **Text & UI Box:** `"SUPER INTERESTING TOPIC!"`
-* **UI:** **Mustard Yellow (`#F4C430`)** pill badge, **Deep Navy (`#1B2A4A`)** text, 3px Navy border + hard shadow.
+* **UI:** Mustard Yellow (`#F4C430`) pill badge, Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
 
 
-* **Text Animation:** Elastic Pop-In (0% → 110% → 100%) at top-center → gentle float → Quick Slide-Left Exit (0.15s).
+* **Text Animation:** Elastic Pop-In (`0% → 110% → 100%`) at top-center → gentle float → Quick Slide-Left Exit (`0.15s`).
 
-### 2. Image 2 — Hook (Rumbling Stomach)
+**2. Image 2 — Hook (Empty Plate & Stomach Layers)**
 
-* **Entry Transition:** **Fast Whip-Slide Left** (0.15s) with horizontal motion blur.
-* **Image Motion:** Slow zoom-in toward the rumbling stomach and fat-cell cutaway.
-* **Text & UI Box:** `"ఆకలి = FAT BURN?"`
-* **UI:** **Mustard Yellow (`#F4C430`)** pill badge, **Deep Navy (`#1B2A4A`)** text, 3px Navy border + hard shadow.
-
-
-* **Text Animation:** Elastic Scale-Up → slight pulse on *"Fatని Burn"* → Quick Slide-Up Fade (0.15s).
-
-### 3. Image 3 — Curiosity 1 (Skipping Meals)
-
-* **Entry Transition:** **Push-Up Slide** (0.2s) — pushes Image 2 off the top edge.
-* **Image Motion:** Slow pan left-to-right across the office desk and untouched fat cells.
-* **Text & UI Box:** `"LUNCH LATE? / DINNER SKIP?"`
-* **UI:** **Soft Sage Green (`#D8E8D4`)** stacked sticky-note box, **Deep Navy (`#1B2A4A`)** text, 3px Navy border.
+* **Entry Transition:** Fast Whip-Slide Left (`0.15s`) with horizontal motion blur.
+* **Image Motion:** Slow zoom-in toward the empty plate and the three-layer stomach cutaway.
+* **Text & UI Box:** `"FASTING = ఆకలితో ఉండటమా?"`
+* **UI:** Mustard Yellow (`#F4C430`) pill badge, Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
 
 
-* **Text Animation:** Typewriter Reveal (word-by-word) → pop a dark green checkmark badge beside it → Fast Wipe-Left (0.15s).
+* **Text Animation:** Elastic Scale-Up → slight pulse on `"ఆకలితో ఉండటమా?"` → Quick Slide-Up Fade (`0.15s`).
 
-### 4. Image 4 — Curiosity 2 (Locked Fat Layer)
+**3. Image 3 — Curiosity 1 (Nonstop Eating & Tiffin Boxes)**
 
-* **Entry Transition:** **Snap Zoom-In Cut** (0.1s) on *"కానీ మీకు తెలుసా"*.
-* **Image Motion:** 2-frame micro-shake on entry, then slow zoom toward the locked padlock on the fat cell.
-* **Text & UI Box:** `"BODY FATని ముట్టుకోదు!"`
-* **UI:** **Cream Paper (`#FFF8E7`)** warning banner with a thick **Warm Terracotta (`#C84B28`)** border and **Warm Terracotta (`#C84B28`)** bold text.
-
-
-* **Text Animation:** Slam-Down Drop (150% → 100%) → 2-frame horizontal jitter → Glitch-Out Dissolve (0.1s).
-
-### 5. Image 5 — Explanation Setup (Chalkboard Question)
-
-* **Entry Transition:** **Zoom-Out Reveal** (0.2s) pulling back from the padlock to the chalkboard.
-* **Image Motion:** Gentle upward tilt toward the chalkboard diagrams.
-* **Text & UI Box:** `"మరి BODY ఏం చేస్తుంది?"`
-* **UI:** **Mustard Yellow (`#F4C430`)** lower-third ribbon, **Deep Navy (`#1B2A4A`)** text, plus three **Deep Navy** `"?"` icons floating above.
+* **Entry Transition:** Push-Up Slide (`0.2s`) — pushes Image 2 off the top edge.
+* **Image Motion:** Slow pan left-to-right across the three stacked tiffin boxes and digestive tract cutaway.
+* **Text & UI Box:** `"TIFFIN ➔ LUNCH ➔ DINNER"`
+* **UI:** Soft Sage Green (`#D8E8D4`) stacked sticky-note box, Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
 
 
-* **Text Animation:** Slide-Up from bottom mask (0.2s) → gentle bob on `"?"` icons → Scale-Down Pop (100% → 0%) in 0.15s.
+* **Text Animation:** Typewriter Reveal (word-by-word) → pop a Warm Terracotta (`#C84B28`) `"NO BREAK!"` mini-tag beside it → Fast Wipe-Left (`0.15s`).
 
-### 6. Image 6 — Answer-Bridge (Easel Stand)
+**4. Image 4 — Curiosity 2 (16-Hour Secret Backup Switch)**
 
-* **Entry Transition:** **Paper-Swipe Left** (0.15s) horizontal page turn.
-* **Image Motion:** Punch-in zoom (100% → 108%) toward the easel's three body zones.
-* **Text & UI Box:** `"SIMPLE SCIENCE 👇"`
-* **UI:** **Soft Sage Green (`#D8E8D4`)** capsule pill, **Deep Navy (`#1B2A4A`)** text, 3px Navy border + hard shadow.
-
-
-* **Text Animation:** Slide-In from Left with overshoot bounce → downward bounce on `👇` → Slide-Out Right (0.15s).
-
-### 7. Image 7 — Explanation 1 (Cash vs. Bank FD)
-
-* **Entry Transition:** **Center Split-Wipe** (0.2s) opening from the middle.
-* **Image Motion:** Slow pan from the wallet (left) across to the bank safe (right).
-* **Text & UI Box:** `"GLUCOSE = CASH 💵"` → `"FAT = BANK FD 🏦"`
-* **UI:** Left card in **Soft Sage Green (`#D8E8D4`)** with **Deep Navy** text; Right card in **Mustard Yellow (`#F4C430`)** with **Deep Navy** text.
+* **Entry Transition:** Snap Zoom-In Cut (`0.1s`) on `"14 నుండి 16 గంటలు"`.
+* **Image Motion:** 2-frame micro-shake on entry, then slow zoom toward the `16 HRS` timer and mechanical toggle switch.
+* **Text & UI Box:** `"16 HRS = BACKUP SYSTEM ON!"`
+* **UI:** Cream Paper (`#FFF8E7`) alert banner with a thick Warm Terracotta (`#C84B28`) border and Warm Terracotta (`#C84B28`) bold text.
 
 
-* **Text Animation:** Pop left card over wallet → 1.5s later pop right card over safe → Both Slide-Down Fade together (0.15s).
+* **Text Animation:** Slam-Down Drop (`150% → 100%`) → 2-frame horizontal jitter → Glitch-Out Dissolve (`0.1s`).
 
-### 8. Image 8 — Explanation 2 (Fridge vs. Store Room)
+**5. Image 5 — Explanation Setup (Chalkboard & Magnifying Glass)**
 
-* **Entry Transition:** **Push-Right Slide** (0.2s) sweeping in from the left.
-* **Image Motion:** Slow zoom-in on the liver glycogen cutaway beside the fridge.
-* **Text & UI Box:** `"GLYCOGEN = FRIDGE FOOD"`
-* **UI:** **Cream Paper (`#FFF8E7`)** top bar with **Deep Navy (`#1B2A4A`)** text and a **Sage Green** underline; bold **Warm Terracotta (`#C84B28`)** `"X"` over the locked door.
-
-
-* **Text Animation:** Wipe-Right Reveal (0.2s) → blink the `"X"` twice on *"అస్సలు వెళ్ళదు"* → Cross-Fade Out (0.15s).
-
-### 9. Image 9 — Explanation 3 (Hybrid Car & Insulin)
-
-* **Entry Transition:** **Fast Whip-Slide Up** (0.15s) with vertical motion blur.
-* **Image Motion:** Slow zoom-in on the insulin dots clamping the fat cell.
-* **Text & UI Box:** `"PETROL ➔ CNG"` → `"INSULIN = FAT LOCK 🔒"`
-* **UI:** Top card in **Mustard Yellow (`#F4C430`)** with **Deep Navy** text, flipping into a **Soft Peach (`#FDE8D7`)** alert card with **Warm Terracotta (`#C84B28`)** text.
+* **Entry Transition:** Zoom-Out Reveal (`0.2s`) pulling back from the switch to the chalkboard torso.
+* **Image Motion:** Gentle upward tilt toward the magnifying glass and upper abdomen cutaway.
+* **Text & UI Box:** `"BODY లోపల ఏం జరుగుతుంది?"`
+* **UI:** Mustard Yellow (`#F4C430`) lower-third ribbon, Deep Navy (`#1B2A4A`) text, plus three Deep Navy `"?"` icons floating above.
 
 
-* **Text Animation:** Slide-In first card → 3D Flip-Down swap to second card → pulse `🔒` → Zoom-In Fade Out.
+* **Text Animation:** Slide-Up from bottom mask (`0.2s`) → gentle bob on `"?"` icons → Scale-Down Pop (`100% → 0%`) in `0.15s`.
 
-### 10. Image 10 — Explanation 4 (Master Key & Glucagon)
+**6. Image 6 — Answer-Bridge (3-Step Staircase)**
 
-* **Entry Transition:** **Zoom-Through Transition** (0.2s) into the cell membrane, emerging at the keyhole.
-* **Image Motion:** Gentle pan from the cupboard key to the opening fat cell.
-* **Text & UI Box:** `"10–12 HOURS LATER ⏱️"` → `"GLUCAGON = MASTER KEY 🔑"`
-* **UI:** Top time-chip in **Cream (`#FFF8E7`)** with **Deep Navy** text; main badge below in **Mustard Yellow (`#F4C430`)** with **Deep Navy** text.
-
-
-* **Text Animation:** Pop time-chip → 1.5s later Slide-Up main badge underneath → subtle scale pulse on *"MASTER KEY"* → Split-Fade Out.
-
-### 11. Image 11 — Explanation 5 (Gas Stove & Ketones)
-
-* **Entry Transition:** **Warm Orange Flash-Dissolve** (0.15s) bridging into the stove flame.
-* **Image Motion:** Slow zoom-in on the glowing mitochondrion sparks above the stove.
-* **Text & UI Box:** `"FATTY ACIDS ➔ KETONES 🔥"`
-* **UI:** **Soft Peach (`#FDE8D7`)** pill badge with **Deep Navy (`#1B2A4A`)** text and `"KETONES"` highlighted in **Warm Terracotta (`#C84B28`)**.
+* **Entry Transition:** Paper-Swipe Left (`0.15s`) horizontal page turn.
+* **Image Motion:** Punch-in zoom (`100% → 108%`) toward the three-step staircase and spiral notebook.
+* **Text & UI Box:** `"STEP BY STEP SCIENCE 👇"`
+* **UI:** Soft Sage Green (`#D8E8D4`) capsule pill, Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
 
 
-* **Text Animation:** Rise-Up Fade (moves up 30px) → gentle upward float → Quick Blur-Out Dissolve (0.15s).
+* **Text Animation:** Slide-In from Left with overshoot bounce → downward bounce on `👇` → Slide-Out Right (`0.15s`).
 
-### 12. Image 12 — Closer (Ghrelin Alarm)
+**7. Image 7 — Explanation 1 (Phone Battery & Liver Glycogen)**
 
-* **Entry Transition:** **Hard Cut + 3-Frame Shake** (0.1s) directly onto the ringing alarm clock.
-* **Image Motion:** Slow upward pan following the nerve pathway from stomach to brain.
-* **Text & UI Box:** `"ఆకలి = GHRELIN ALARM ⏰"`
-* **UI:** **Mustard Yellow (`#F4C430`)** alert box, **Deep Navy (`#1B2A4A`)** text, 3px **Warm Terracotta** border.
-
-
-* **Text Animation:** Shake-In Pop (80% → 100%) → rapid tilt-wiggle on `⏰` → Slide-Left Exit (0.15s).
-
-### 13. Image 13 — Payoff Setup (Insulin Dropping)
-
-* **Entry Transition:** **Smooth Slide-Down** (0.25s) matching the downward drop of the Insulin needle.
-* **Image Motion:** Slow, tight zoom-in on the low Sage Green zone of the Insulin meter.
-* **Text & UI Box:** `"INSULIN ⬇️ = GAME CHANGER"`
-* **UI:** Minimal **Soft Sage Green (`#D8E8D4`)** clean bar, **Deep Navy (`#1B2A4A`)** text, thin 2px Navy border.
+* **Entry Transition:** Center Split-Wipe (`0.2s`) opening from the middle.
+* **Image Motion:** Slow pan from the smartphone battery icon across to the liver glycogen cutaway.
+* **Text & UI Box:** `"GLYCOGEN = PHONE BATTERY 🔋"`
+* **UI:** Mustard Yellow (`#F4C430`) top card with Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
 
 
-* **Text Animation:** Slow Fade-In + gentle Drop-Down (0.35s) → calm, steady hold → Instant Snap-Cut.
+* **Text Animation:** Pop-In over the smartphone → subtle pulse on `🔋` → Slide-Down Fade (`0.15s`).
 
-### 14. Image 14 — Payoff Punch Line (Glowing Torso)
+**8. Image 8 — Explanation 2 (Cupboard Key & Fat Cell)**
 
-* **Entry Transition:** **Explosive Zoom-Out Snap** (0.1s) bursting into the glowing torso.
-* **Image Motion:** Quick 110% → 100% punch-back, then slow zoom-in on the radiating energy sparks.
-* **Text & UI Box:** `"ఆకలి ≠ FAT BURN"` → `"INSULIN తగ్గితేనే FAT BURN START!"`
-* **UI:** Line 1 in **Cream (`#FFF8E7`)** box with **Deep Navy** text + bold **Warm Terracotta** strike-through; Line 2 in a big **Mustard Yellow (`#F4C430`)** hero box with **Deep Navy (`#1B2A4A`)** text and heavy 4px Navy border.
+* **Entry Transition:** Push-Right Slide (`0.2s`) sweeping in from the left.
+* **Image Motion:** Gentle pan from the brass cupboard key to the opening fat cell cross-section.
+* **Text & UI Box:** `"INSULIN ⬇️"` → `"FAT CELLS OPEN 🔑"`
+* **UI:** Left chip in Cream (`#FFF8E7`) with Deep Navy text; right badge in Mustard Yellow (`#F4C430`) with Deep Navy text, `3px` Navy border + hard shadow.
 
 
-* **Text Animation:** Pop Line 1 + animated strike-through → kinetic word-by-word Pop-In for Line 2 → bold scale-pulse → Clean Wipe-Left (0.2s).
+* **Text Animation:** Pop left chip → `1.5s` later pop right badge over the fat cell → subtle scale pulse on `🔑` → Cross-Fade Out (`0.15s`).
 
-### 15. Image 15 — Outro CTA (Signboard)
+**9. Image 9 — Explanation 3 (Home Inverter & Brain Ketones)**
 
-* **Entry Transition:** **Clean Slide-Left** (0.2s) settling smoothly onto the Outro signboard.
-* **Image Motion:** Very slow zoom-in (100% → 103%) keeping the signboard payoff text crisp and readable.
+* **Entry Transition:** Fast Whip-Slide Up (`0.15s`) with vertical motion blur.
+* **Image Motion:** Slow zoom-in from the home inverter box up to the glowing ketone pathways in the brain.
+* **Text & UI Box:** `"KETONES = BRAIN INVERTER ⚡"`
+* **UI:** Soft Sage Green (`#D8E8D4`) pill badge with Deep Navy (`#1B2A4A`) text and `"KETONES"` highlighted in Warm Terracotta (`#C84B28`).
+
+
+* **Text Animation:** Rise-Up Fade (moves up `30px`) → gentle upward float → Zoom-In Fade Out (`0.15s`).
+
+**10. Image 10 — Explanation 4 (Clean Kitchen & Cell Autophagy)**
+
+* **Entry Transition:** Zoom-Through Transition (`0.2s`) into the cell, emerging at the clean kitchen counter.
+* **Image Motion:** Slow pan across the swept kitchen counter up to the lysosome cleanup diagram.
+* **Text & UI Box:** `"AUTOPHAGY = CELL CLEANUP 🧹"`
+* **UI:** Cream Paper (`#FFF8E7`) top bar with Deep Navy (`#1B2A4A`) text and a Soft Sage Green underline, `3px` Navy border + hard shadow.
+
+
+* **Text Animation:** Wipe-Right Reveal (`0.2s`) → gentle side-to-side wiggle on `🧹` → Split-Fade Out (`0.15s`).
+
+**11. Image 11 — Explanation Closer (Armchair & Balance Scale)**
+
+* **Entry Transition:** Smooth Slide-Left (`0.2s`) settling onto the armchair and balance scale.
+* **Image Motion:** Slow zoom-in (`100% → 105%`) centering on the balanced scale comparing Fasting and Starvation.
+* **Text & UI Box:** `"FASTING ≠ STARVATION"` → `"PLANNED REST ⚖️"`
+* **UI:** Top card in Cream (`#FFF8E7`) with Warm Terracotta (`#C84B28`) bold text; bottom pill in Soft Sage Green (`#D8E8D4`) with Deep Navy (`#1B2A4A`) text.
+
+
+* **Text Animation:** Pop top card → `1.2s` later Slide-Up bottom pill underneath → Clean Wipe-Left (`0.15s`).
+
+**12. Image 12 — Payoff Setup (Glowing Silhouette & Mitochondrion)**
+
+* **Entry Transition:** Smooth Slide-Down (`0.25s`) easing into the glowing silhouette.
+* **Image Motion:** Slow, tight zoom-in on the glowing mitochondrion energy sparks.
+* **Text & UI Box:** `"BODY WEAK అవ్వదు!"`
+* **UI:** Minimal Soft Sage Green (`#D8E8D4`) clean bar, Deep Navy (`#1B2A4A`) text, thin `2px` Navy border.
+
+
+* **Text Animation:** Slow Fade-In + gentle Drop-Down (`0.35s`) → calm, steady hold → Instant Snap-Cut.
+
+**13. Image 13 — Payoff Punch Line (Toolbox & Repaired Cell)**
+
+* **Entry Transition:** Explosive Zoom-Out Snap (`0.1s`) bursting into the celebrating stickman and shining toolbox.
+* **Image Motion:** Quick `110% → 100%` punch-back, then slow zoom-in on the repaired healthy cell.
+* **Text & UI Box:** `"ఆకలి కాదు..."` → `"ULTIMATE REPAIR MODE! 🛠️"`
+* **UI:** Line 1 in Cream (`#FFF8E7`) box with Deep Navy text + bold Warm Terracotta strike-through; Line 2 in a big Mustard Yellow (`#F4C430`) hero box with Deep Navy (`#1B2A4A`) text and heavy `4px` Navy border.
+
+
+* **Text Animation:** Pop Line 1 + animated strike-through → kinetic word-by-word Pop-In for Line 2 → bold scale-pulse → Clean Wipe-Left (`0.2s`).
+
+**14. Image 14 — Outro CTA (Signboard)**
+
+* **Entry Transition:** Clean Slide-Left (`0.2s`) settling smoothly onto the Outro signboard.
+* **Image Motion:** Very slow zoom-in (`100% → 103%`) keeping the signboard payoff text crisp and readable.
 * **Text & UI Box:** `"SUBSCRIBE & COMMENT 👇"`
-* **UI:** Compact **Mustard Yellow (`#F4C430`)** CTA button pill in the lower-third safe zone, **Deep Navy (`#1B2A4A`)** text, 3px Navy border + hard shadow.
+* **UI:** Compact Mustard Yellow (`#F4C430`) CTA button pill in the lower-third safe zone, Deep Navy (`#1B2A4A`) text, `3px` Navy border + hard shadow.
 
 
-* **Text Animation:** Bouncy Pop-Up in the final 3 seconds → gentle bounce on `👇` → Hold until smooth fade to black (0.3s).
+* **Text Animation:** Bouncy Pop-Up in the final 3 seconds → gentle bounce on `👇` → Hold until smooth fade to black (`0.3s`).
