@@ -502,22 +502,36 @@ class AutoVideoStudioApp(tk.Tk):
                 w.setframerate(SAMPLE_RATE)
                 w.writeframes(full_audio.tobytes())
 
-            # Scenes badge configuration mapping
+            # Scenes badge configuration mapping strictly in verified clean cream space
             scenes_cfg = [
-                {"badges": [("p2_b1.png", 240, 0.2, 0.25)]},
-                {"badges": [("p2_b2.png", 240, 0.2, 0.25)]},
-                {"badges": [("p2_b3.png", 240, 0.2, 0.25)]},
-                {"badges": [("p2_b4.png", 240, 0.2, 0.25)]},
-                {"badges": [("p2_b5.png", 240, 0.2, 0.25)]},
-                {"badges": [("p2_b6.png", 240, 0.2, 0.25)]},
-                {"badges": [("p2_b7.png", 240, 0.2, 0.25)]},
-                {"badges": [("p2_b8_1.png", 220, 0.2, 0.25), ("p2_b8_2.png", 370, 1.5, 0.25)]},
-                {"badges": [("p2_b9.png", 240, 0.2, 0.25)]},
-                {"badges": [("p2_b10.png", 240, 0.2, 0.25)]},
-                {"badges": [("p2_b11_1.png", 220, 0.2, 0.25), ("p2_b11_2.png", 370, 1.2, 0.25)]},
-                {"badges": [("p2_b12.png", 240, 0.2, 0.25)]},
-                {"badges": [("p2_b13_1.png", 220, 0.2, 0.25), ("p2_b13_2.png", 375, 1.0, 0.25)]},
-                {"badges": [("p2_b14.png", 1480, 0.2, 0.25)]},
+                # Scene 1: Welcome signboard is at y=800; top cream space (0-200)
+                {"badges": [("p2_b1.png", 95, 0.2, 0.25)]},
+                # Scene 2: Stomach layers starts at y=263; top cream space (0-263)
+                {"badges": [("p2_b2.png", 130, 0.2, 0.25)]},
+                # Scene 3: Nonstop digestion signboard at y=368; top cream space (0-368)
+                {"badges": [("p2_b3.png", 170, 0.2, 0.25)]},
+                # Scene 4: Backup System signboard at y=187; top cream space (0-187)
+                {"badges": [("p2_b4.png", 90, 0.2, 0.25)]},
+                # Scene 5: Inside Torso chalkboard starts at y=280; top cream space (0-280)
+                {"badges": [("p2_b5.png", 120, 0.2, 0.25)]},
+                # Scene 6: Simple Breakdown chalkboard at top; clean cream floor at bottom (1498-1899)
+                {"badges": [("p2_b6.png", 1600, 0.2, 0.25)]},
+                # Scene 7: Glycogen Battery sign starts at y=241; top cream space (0-241)
+                {"badges": [("p2_b7.png", 120, 0.2, 0.25)]},
+                # Scene 8: Cupboard starts at y=454; top cream space (0-454) for both chips
+                {"badges": [("p2_b8_1.png", 110, 0.2, 0.25), ("p2_b8_2.png", 250, 1.5, 0.25)]},
+                # Scene 9: Brain Ketone cutaway starts at y=434; top cream space (0-434)
+                {"badges": [("p2_b9.png", 170, 0.2, 0.25)]},
+                # Scene 10: Cell Autophagy sign at top; clean cream floor below table at bottom (1526-1899)
+                {"badges": [("p2_b10.png", 1600, 0.2, 0.25)]},
+                # Scene 11: Scale & Armchair starts at y=448; top cream space (0-448) for both badges
+                {"badges": [("p2_b11_1.png", 120, 0.2, 0.25), ("p2_b11_2.png", 260, 1.2, 0.25)]},
+                # Scene 12: Mitochondria starts at y=414; top cream space (58-414)
+                {"badges": [("p2_b12.png", 160, 0.2, 0.25)]},
+                # Scene 13: Repaired cell starts at y=343; top cream space (0-343) for both badges
+                {"badges": [("p2_b13_1.png", 110, 0.2, 0.25), ("p2_b13_2.png", 250, 1.0, 0.25)]},
+                # Scene 14: Outro chalkboard at top; clean cream floor at bottom (1492-1709)
+                {"badges": [("p2_b14.png", 1600, 0.2, 0.25)]},
             ]
 
             ffmpeg_cmd = [
