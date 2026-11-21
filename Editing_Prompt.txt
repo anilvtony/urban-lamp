@@ -1,0 +1,30 @@
+Now generate the complete VIRAL EDITING DIRECTIONS + YOUTUBE PACKAGING for the script and images above. Follow these exact rules:
+
+=== PART 1: EDITING DIRECTIONS (EXACTLY 1 DIRECTION PER IMAGE) ===
+Generate 1 editing direction for EVERY single image (e.g., if there are 15 images including Intro and Outro, generate 15 numbered editing directions: Image 1 through Image 15).
+
+STRICT RULES:
+1. NO EXTRA SOUNDS / NO SFX: Do NOT include any sound effects, whooshes, dings, or music cues. The video already has voiceover narration.
+2. ZERO WHITE TEXT: Never use white text anywhere. Use the locked color palette from the images (e.g., Deep Navy / dark ink for primary text, warm accent color for shock/myth-busting words, and light/pastel or mustard/yellow pills for UI backgrounds).
+3. CONTINUOUS MOTION: Every image must have subtle 3–5% continuous zoom or pan so the screen never freezes.
+4. TELUGU-ENGLISH MIX TEXT: On-screen text must be short, punchy, mobile-readable, and match the spoken Telugu-English script.
+
+Start with a brief **Global Text UI Style Guide** (Font, Primary Text Color, Alert Text Color, UI Box Style with corner radius, border thickness, and flat hard drop shadow matching the locked palette).
+
+Then, for EVERY image (1 to N), output in this exact format:
+### [n]. Image [n] — [Beat Name]
+* **Entry Transition:** [Exact slide/zoom/wipe transition + duration in seconds, e.g., Fast Whip-Slide Left (0.15s)]
+* **Image Motion:** [Exact zoom/pan direction and percentage]
+* **Text & UI Box:** `"[Short on-screen text]"`
+  * **UI:** [Exact badge/card background color + hex code, text color + hex code, border & flat shadow — NO white text]
+* **Text Animation:** [Text In animation] → [Text Hold animation synced to spoken word] → [Text Out animation + duration]
+
+=== PART 2: YOUTUBE PACKAGING ===
+Output the following in natural Telugu-English mix:
+1. **YouTube Title:** (Best title from Section A)
+2. **YouTube Description:** (3–4 short, curiosity-driven lines summarizing the video + Subscribe & Comment CTA)
+3. **Hashtags:** (10–12 relevant Telugu & English Shorts hashtags)
+4. **Thumbnail:**
+   - **Thumbnail Text:** (2–5 words, natural Telugu-English mix, exact UI badge colors with hex codes, ZERO white text)
+   - **AI Thumbnail Prompt (9:16 Vertical Shorts Frame):** (Minimalist 2D stick-figure illustration matching the locked protagonist cue and locked color scheme, flat vector art, off-white paper background, bold black ink outlines, no 3D render, no watermark, rendering only the exact thumbnail text in a bold comic badge with no white text.)
+   
