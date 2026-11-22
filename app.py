@@ -656,9 +656,10 @@ class AutoVideoStudioApp(tk.Tk):
             orig_txt = ""
             if sc_num in DEFAULT_BADGE_MAP:
                 orig_txt = DEFAULT_BADGE_MAP[sc_num][0][1]
-            if new_text != orig_txt or not os.path.exists(os.path.join(BADGE_DIR, bname)):
-                self.log(f"Rendering badge image for {sc_str}: '{new_text}' (Pure White BG, Wrap={wrap_w}px)")
+            if new_text != orig_txt or not os.path.exists(os.path.join(BADGE_DIR, bname)) or wrap_w > 0:
+                self.log(f"Rendering high-precision badge image for {sc_str}: '{new_text}' (Pure White BG, Wrap={wrap_w}px)")
                 render_single_badge_to_disk(new_text, bg="#FFFFFF", txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67", fsize=44, strike=False, out_filename=bname, overwrite=True, wrap_width=wrap_w)
+                self.preview_repositioned_badge()
 
         self.badge_positions[sc_num] = {
             "x": new_x,
@@ -705,23 +706,28 @@ class AutoVideoStudioApp(tk.Tk):
         nw, nh = int(w * scale), int(h * scale)
         im_res = im.resize((nw, nh), Image.LANCZOS).crop(((nw-WIDTH)//2, (nh-HEIGHT)//2, (nw-WIDTH)//2+WIDTH, (nh-HEIGHT)//2+HEIGHT))
 
-        # Render dynamic badge in real time to reflect text & wrap changes instantly
-        cur_text = self.text_edit_var.get().strip()
-        wrap_w = self.wrap_width_var.get() if (hasattr(self, 'enable_wrap_var') and self.enable_wrap_var.get()) else 0
+        # Priority 1: Load pre-rendered high-quality badge from disk (rendered via Edge with 100% accurate HarfBuzz Telugu guninthalu)
+        candidates = [f"p2_b{sc_num}.png", f"b{sc_num}.png"]
+        bpath = None
+        for cand in candidates:
+            p = os.path.join(BADGE_DIR, cand)
+            if os.path.exists(p):
+                bpath = p
+                break
         
-        # If user is editing text or wrapping, dynamically generate preview on the fly
-        if cur_text:
-            b_im = render_dynamic_preview_badge(cur_text, wrap_width=wrap_w, bg="#FFFFFF", txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67")
-        else:
-            # Check badge from disk
-            candidates = [f"p2_b{sc_num}.png", f"b{sc_num}.png"]
-            bpath = None
-            for cand in candidates:
-                p = os.path.join(BADGE_DIR, cand)
-                if os.path.exists(p):
-                    bpath = p
-                    break
-            b_im = Image.open(bpath).convert('RGBA') if (bpath and os.path.exists(bpath)) else None
+        b_im = None
+        if bpath and os.path.exists(bpath):
+            try:
+                b_im = Image.open(bpath).convert('RGBA')
+            except Exception:
+                b_im = None
+
+        # Fallback if no disk badge exists: generate dynamically
+        if b_im is None:
+            cur_text = self.text_edit_var.get().strip()
+            wrap_w = self.wrap_width_var.get() if (hasattr(self, 'enable_wrap_var') and self.enable_wrap_var.get()) else 0
+            if cur_text:
+                b_im = render_dynamic_preview_badge(cur_text, wrap_width=wrap_w, bg="#FFFFFF", txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67")
 
         if b_im is not None:
             # Apply scale if modified
