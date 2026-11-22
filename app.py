@@ -26,7 +26,69 @@ import time
 import random
 import threading
 import numpy as np
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw, ImageFont
+
+def render_dynamic_preview_badge(text, wrap_width=620, fsize=44, bg='#FFFFFF', txt_col='#2B3A67', border_col='#2B3A67', shadow_col='#2B3A67'):
+    try:
+        font = ImageFont.truetype('NotoSansTelugu-Full.ttf', fsize)
+    except Exception:
+        font = ImageFont.load_default()
+
+    words = text.split()
+    lines = []
+    cur = ''
+    for w in words:
+        cand = (cur + ' ' + w).strip()
+        bb = font.getbbox(cand)
+        cand_w = bb[2] - bb[0]
+        if wrap_width and cand_w > wrap_width and cur:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = cand
+    if cur:
+        lines.append(cur)
+
+    line_bboxes = [font.getbbox(line) for line in lines]
+    line_widths = [b[2] - b[0] for b in line_bboxes]
+    line_heights = [b[3] - b[1] for b in line_bboxes]
+    
+    max_w = max(line_widths) if line_widths else 100
+    line_h = max(line_heights) if line_heights else fsize
+    spacing = int(fsize * 0.3)
+    total_text_h = len(lines) * line_h + (len(lines) - 1) * spacing
+
+    pad_x = 36
+    pad_y = 16
+    box_w = max_w + pad_x * 2
+    box_h = total_text_h + pad_y * 2
+    
+    shadow_offset = 6
+    border_w = 4
+    radius = 18
+
+    im_w = box_w + shadow_offset + border_w * 2 + 10
+    im_h = box_h + shadow_offset + border_w * 2 + 10
+    im = Image.new('RGBA', (im_w, im_h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(im)
+
+    sx0 = 5 + shadow_offset
+    sy0 = 5 + shadow_offset
+    draw.rounded_rectangle([sx0, sy0, sx0 + box_w, sy0 + box_h], radius=radius, fill=shadow_col)
+
+    bx0 = 5
+    by0 = 5
+    draw.rounded_rectangle([bx0, by0, bx0 + box_w, by0 + box_h], radius=radius, fill=bg, outline=border_col, width=border_w)
+
+    cur_y = by0 + pad_y
+    for i, line in enumerate(lines):
+        lw = line_widths[i]
+        lx = bx0 + (box_w - lw) // 2
+        draw.text((lx, cur_y), line, font=font, fill=txt_col)
+        cur_y += line_h + spacing
+
+    bbox = im.getbbox()
+    return im.crop(bbox) if bbox else im
 import cv2
 
 import tkinter as tk
@@ -455,6 +517,7 @@ class AutoVideoStudioApp(tk.Tk):
         if not sc_str:
             return
         sc_num = sc_str.replace("Scene ", "").strip()
+        self.current_scene_loaded = sc_num
         data = self.badge_positions.get(sc_num, {"x": WIDTH // 2, "y": 120, "scale": 1.0, "text": ""})
         if isinstance(data, int):
             data = {"x": WIDTH // 2, "y": data, "scale": 1.0, "text": ""}
@@ -526,7 +589,27 @@ class AutoVideoStudioApp(tk.Tk):
         if f: self.out_video_var.set(f)
 
     # --- BADGE REPOSITIONING & EDITING LOGIC ---
+    def save_current_scene_in_memory(self):
+        """Silently auto-commit whatever the user tweaked for the currently active scene."""
+        if hasattr(self, 'current_scene_loaded') and self.current_scene_loaded:
+            sc_num = self.current_scene_loaded
+            new_x = self.x_pos_var.get()
+            new_y = self.y_pos_var.get()
+            new_scale = round(self.scale_var.get(), 2)
+            new_text = self.text_edit_var.get().strip()
+            wrap_w = self.wrap_width_var.get() if (hasattr(self, 'enable_wrap_var') and self.enable_wrap_var.get()) else 0
+            
+            self.badge_positions[sc_num] = {
+                "x": new_x,
+                "y": new_y,
+                "scale": new_scale,
+                "text": new_text,
+                "wrap_width": wrap_w
+            }
+
     def on_scene_selected(self, event=None):
+        # Auto-save current scene in memory before switching so edits are NEVER lost/undone!
+        self.save_current_scene_in_memory()
         self.update_scene_editor_fields()
 
     def on_y_slider_moved(self, val):
@@ -622,18 +705,25 @@ class AutoVideoStudioApp(tk.Tk):
         nw, nh = int(w * scale), int(h * scale)
         im_res = im.resize((nw, nh), Image.LANCZOS).crop(((nw-WIDTH)//2, (nh-HEIGHT)//2, (nw-WIDTH)//2+WIDTH, (nh-HEIGHT)//2+HEIGHT))
 
-        # Check badge
-        candidates = [f"p2_b{sc_num}.png", f"b{sc_num}.png"]
-        bpath = None
-        for cand in candidates:
-            p = os.path.join(BADGE_DIR, cand)
-            if os.path.exists(p):
-                bpath = p
-                break
+        # Render dynamic badge in real time to reflect text & wrap changes instantly
+        cur_text = self.text_edit_var.get().strip()
+        wrap_w = self.wrap_width_var.get() if (hasattr(self, 'enable_wrap_var') and self.enable_wrap_var.get()) else 0
+        
+        # If user is editing text or wrapping, dynamically generate preview on the fly
+        if cur_text:
+            b_im = render_dynamic_preview_badge(cur_text, wrap_width=wrap_w, bg="#FFFFFF", txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67")
+        else:
+            # Check badge from disk
+            candidates = [f"p2_b{sc_num}.png", f"b{sc_num}.png"]
+            bpath = None
+            for cand in candidates:
+                p = os.path.join(BADGE_DIR, cand)
+                if os.path.exists(p):
+                    bpath = p
+                    break
+            b_im = Image.open(bpath).convert('RGBA') if (bpath and os.path.exists(bpath)) else None
 
-        if bpath and os.path.exists(bpath):
-            b_im = Image.open(bpath).convert('RGBA')
-            
+        if b_im is not None:
             # Apply scale if modified
             sc_factor = self.scale_var.get()
             if abs(sc_factor - 1.0) > 0.02:
