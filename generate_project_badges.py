@@ -10,47 +10,48 @@ EDGE_PATH = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 BADGE_DIR = os.path.join(WORKSPACE, "rendered_badges")
 os.makedirs(BADGE_DIR, exist_ok=True)
 
-# Colors from Editing_Directions.txt Style Guide:
-# Backgrounds: Soft Sand (#EADBC8), Off-White (#FAF8F5)
-# Texts: Deep Indigo (#2B3A67), Burnt Sienna (#C85A32), Teal Slate (#2E7D7B)
-# Borders: 3.5px Deep Indigo (#2B3A67)
-# Shadows: Flat 6px 6px 0px Teal Slate (#2E7D7B), Burnt Sienna (#C85A32), or Deep Indigo (#2B3A67)
+# User Direction:
+# - Clean Pure White (#FFFFFF) background only
+# - Deep Indigo (#2B3A67) or Terracotta (#C85A32) text and border
+# - Auto-wrap long text across 2 neat lines (max-width: 620px)
 
 SCENE_BADGES = [
-    (1, "Intermittent Fasting పూర్తి వివరణ", "#EADBC8", "#2B3A67", "#2B3A67", "#2E7D7B", 46, "pill"),
-    (2, "ఇది Diet కాదు — Eating Schedule!", "#FAF8F5", "#C85A32", "#2B3A67", "#2B3A67", 46, "card"),
-    (3, "16/8, 5:2, OMAD — ఇన్ని రకాలా?", "#EADBC8", "#2B3A67", "#2B3A67", "#C85A32", 46, "pill"),
-    (4, "తప్పు Method ఎంచుకుంటే నీరసం!", "#FAF8F5", "#C85A32", "#2B3A67", "#2E7D7B", 46, "card"),
-    (5, "మీ Bodyకి ఏది సరిపోతుంది?", "#EADBC8", "#2B3A67", "#2B3A67", "#2E7D7B", 46, "card"),
-    (6, "Simpleగా Break Down చేద్దాం!", "#FAF8F5", "#2E7D7B", "#2B3A67", "#C85A32", 46, "pill"),
-    (7, "కడుపుకి Fixed Opening & Closing Time", "#EADBC8", "#2B3A67", "#2B3A67", "#2E7D7B", 44, "card"),
-    (8, "Food ఆగిపోయాకే Body Cleaning!", "#FAF8F5", "#2E7D7B", "#2B3A67", "#2B3A67", 46, "card"),
-    (9, "కడుపు మాడ్చుకోవడం కాదు — Smart Routine", "#EADBC8", "#2B3A67", "#2B3A67", "#C85A32", 44, "pill"),
-    (10, "16/8 Method: 16 Hrs Off, 8 Hrs On", "#EADBC8", "#2B3A67", "#2B3A67", "#2E7D7B", 44, "card"),
-    (11, "8 Hours నిద్రలోనే గడిచిపోతాయి!", "#FAF8F5", "#2E7D7B", "#2B3A67", "#2B3A67", 46, "pill"),
-    (12, "అందరి ఫస్ట్ ఛాయిస్: 16/8", "#EADBC8", "#2B3A67", "#2B3A67", "#C85A32", 46, "pill"),
-    (13, "Beginners కోసం 12/12 Method", "#FAF8F5", "#2E7D7B", "#2B3A67", "#2E7D7B", 46, "card"),
-    (14, "మెల్లగా 14/10 కి Step Up!", "#EADBC8", "#2B3A67", "#2B3A67", "#C85A32", 46, "pill"),
-    (15, "12/12 తో స్టార్ట్ చేయడం Safe!", "#FAF8F5", "#2B3A67", "#2B3A67", "#2E7D7B", 46, "pill"),
-    (16, "5:2 Diet: 5 Days Normal, 2 Days Low", "#EADBC8", "#C85A32", "#2B3A67", "#2B3A67", 44, "card"),
-    (17, "రెండు రోజుల మధ్య Gap తప్పనిసరి!", "#FAF8F5", "#2B3A67", "#2B3A67", "#C85A32", 46, "card"),
-    (18, "రోజూ కుదరని వాళ్లకి 5:2 Best", "#EADBC8", "#2E7D7B", "#2B3A67", "#2B3A67", 46, "pill"),
-    (19, "Eat-Stop-Eat: 24 Hours Deep Reset", "#FAF8F5", "#2B3A67", "#2B3A67", "#2E7D7B", 44, "card"),
-    (20, "Alternate Day: రోజు విడిచి రోజు", "#EADBC8", "#C85A32", "#2B3A67", "#2B3A67", 46, "card"),
-    (21, "Beginners ఇవి వెంటనే Try చేయొద్దు!", "#FAF8F5", "#C85A32", "#2B3A67", "#C85A32", 46, "pill"),
-    (22, "Warrior Diet: 20 Hrs Fast / 4 Hrs Eat", "#EADBC8", "#2B3A67", "#2B3A67", "#C85A32", 44, "card"),
-    (23, "OMAD: రోజుకి ఒక్కసారే భోజనం!", "#FAF8F5", "#C85A32", "#2B3A67", "#2B3A67", 46, "card"),
-    (24, "పోషకాలు అందకపోయే Risk ఉంది", "#EADBC8", "#C85A32", "#2B3A67", "#2E7D7B", 46, "pill"),
-    (25, "అందరికీ ఒకే Method సరిపోదు!", "#FAF8F5", "#2B3A67", "#2B3A67", "#2E7D7B", 46, "card"),
-    (26, "డాక్టర్ సలహా లేకుండా Risk వద్దు!", "#EADBC8", "#C85A32", "#2B3A67", "#2B3A67", 46, "card"),
-    (27, "Protein + Fiber + Water మర్చిపోవద్దు", "#FAF8F5", "#2E7D7B", "#2B3A67", "#2B3A67", 44, "pill"),
-    (28, "అసలు నిజం ఏంటంటే...", "#EADBC8", "#2B3A67", "#2B3A67", "#2E7D7B", 46, "card"),
-    (29, "లాంగ్ టర్మ్‌లో ఫాలో అయ్యేదే BEST!", "#EADBC8", "#C85A32", "#2B3A67", "#2E7D7B", 46, "card"),
-    (30, "Subscribe & Comment Below!", "#FAF8F5", "#2B3A67", "#2B3A67", "#C85A32", 46, "pill"),
+    (1, "Intermittent Fasting పూర్తి వివరణ", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 44, "card"),
+    (2, "ఇది Diet కాదు — Eating Schedule!", "#FFFFFF", "#C85A32", "#2B3A67", "#2B3A67", 44, "card"),
+    (3, "16/8, 5:2, OMAD — ఇన్ని రకాలా?", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 44, "card"),
+    (4, "తప్పు Method ఎంచుకుంటే నీరసం!", "#FFFFFF", "#C85A32", "#2B3A67", "#2B3A67", 44, "card"),
+    (5, "మీ Bodyకి ఏది సరిపోతుంది?", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 44, "card"),
+    (6, "Simpleగా Break Down చేద్దాం!", "#FFFFFF", "#2E7D7B", "#2B3A67", "#2B3A67", 44, "card"),
+    (7, "కడుపుకి Fixed Opening & Closing Time", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 42, "card"),
+    (8, "Food ఆగిపోయాకే Body Cleaning!", "#FFFFFF", "#2E7D7B", "#2B3A67", "#2B3A67", 44, "card"),
+    (9, "కడుపు మాడ్చుకోవడం కాదు — Smart Routine", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 42, "card"),
+    (10, "16/8 Method: 16 Hrs Off, 8 Hrs On", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 42, "card"),
+    (11, "8 Hours నిద్రలోనే గడిచిపోతాయి!", "#FFFFFF", "#2E7D7B", "#2B3A67", "#2B3A67", 44, "card"),
+    (12, "అందరి ఫస్ట్ ఛాయిస్: 16/8", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 44, "card"),
+    (13, "Beginners కోసం 12/12 Method", "#FFFFFF", "#2E7D7B", "#2B3A67", "#2B3A67", 44, "card"),
+    (14, "మెల్లగా 14/10 కి Step Up!", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 44, "card"),
+    (15, "12/12 తో స్టార్ట్ చేయడం Safe!", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 44, "card"),
+    (16, "5:2 Diet: 5 Days Normal, 2 Days Low", "#FFFFFF", "#C85A32", "#2B3A67", "#2B3A67", 42, "card"),
+    (17, "రెండు రోజుల మధ్య Gap తప్పనిసరి!", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 44, "card"),
+    (18, "రోజూ కుదరని వాళ్లకి 5:2 Best", "#FFFFFF", "#2E7D7B", "#2B3A67", "#2B3A67", 44, "card"),
+    (19, "Eat-Stop-Eat: 24 Hours Deep Reset", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 42, "card"),
+    (20, "Alternate Day: రోజు విడిచి రోజు", "#FFFFFF", "#C85A32", "#2B3A67", "#2B3A67", 44, "card"),
+    (21, "Beginners ఇవి వెంటనే Try చేయొద్దు!", "#FFFFFF", "#C85A32", "#2B3A67", "#2B3A67", 44, "card"),
+    (22, "Warrior Diet: 20 Hrs Fast / 4 Hrs Eat", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 42, "card"),
+    (23, "OMAD: రోజుకి ఒక్కసారే భోజనం!", "#FFFFFF", "#C85A32", "#2B3A67", "#2B3A67", 44, "card"),
+    (24, "పోషకాలు అందకపోయే Risk ఉంది", "#FFFFFF", "#C85A32", "#2B3A67", "#2B3A67", 44, "card"),
+    (25, "అందరికీ ఒకే Method సరిపోదు!", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 44, "card"),
+    (26, "డాక్టర్ సలహా లేకుండా Risk వద్దు!", "#FFFFFF", "#C85A32", "#2B3A67", "#2B3A67", 44, "card"),
+    (27, "Protein + Fiber + Water మర్చిపోవద్దు", "#FFFFFF", "#2E7D7B", "#2B3A67", "#2B3A67", 42, "card"),
+    (28, "అసలు నిజం ఏంటంటే...", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 44, "card"),
+    (29, "లాంగ్ టర్మ్‌లో ఫాలో అయ్యేదే BEST!", "#FFFFFF", "#C85A32", "#2B3A67", "#2B3A67", 44, "card"),
+    (30, "Subscribe & Comment Below!", "#FFFFFF", "#2B3A67", "#2B3A67", "#2B3A67", 44, "card"),
 ]
 
-def render_badge(num, text, bg, txt_col, border_col, shadow_col, fsize, shape):
-    radius = "50px" if shape == "pill" else "16px"
+def render_badge(num, text, bg="#FFFFFF", txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67", fsize=44, shape="card", wrap_width=620):
+    radius = "18px"
+    wrap_css = f"max-width: {wrap_width}px; white-space: normal; word-break: keep-all; text-align: center; line-height: 1.35;" if (wrap_width and len(text) > 22) else "white-space: nowrap;"
+    
     html_content = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -84,7 +85,7 @@ body {{
     color: {txt_col};
     letter-spacing: 0.5px;
     display: inline-block;
-    white-space: nowrap;
+    {wrap_css}
 }}
 </style>
 </head>
@@ -107,7 +108,7 @@ body {{
         "--hide-scrollbars",
         "--force-device-scale-factor=1",
         f"--screenshot={shot_path}",
-        "--window-size=1600,400",
+        "--window-size=1600,600",
         f"file:///{html_path.replace(os.sep, '/')}"
     ]
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -135,4 +136,4 @@ body {{
 if __name__ == "__main__":
     for item in SCENE_BADGES:
         render_badge(*item)
-    print("Done generating all 30 badges according to Editing_Directions.txt!")
+    print("Done generating all 30 badges in pure white background with text wrapping!")

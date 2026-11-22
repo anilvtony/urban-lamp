@@ -298,19 +298,33 @@ class AutoVideoStudioApp(tk.Tk):
         row1.pack(fill=tk.X, pady=2)
         lbl_sc = tk.Label(row1, text="Scene:", bg="#1E293B", fg="white", font=("Segoe UI", 9, "bold"))
         lbl_sc.pack(side=tk.LEFT, padx=(0, 4))
-        scenes_list = [f"Scene {i}" for i in range(1, 15)]
-        self.cmb_scene = ttk.Combobox(row1, values=scenes_list, textvariable=self.selected_scene_var, state="readonly", width=10)
+        self.cmb_scene = ttk.Combobox(row1, values=self.scenes_list, textvariable=self.selected_scene_var, state="readonly", width=12)
         self.cmb_scene.pack(side=tk.LEFT, padx=4)
         self.cmb_scene.bind("<<ComboboxSelected>>", self.on_scene_selected)
 
         # Editable Text Field
         lbl_txt = tk.Label(row1, text="Text:", bg="#1E293B", fg="white", font=("Segoe UI", 9, "bold"))
-        lbl_txt.pack(side=tk.LEFT, padx=(10, 4))
-        self.ent_text = ttk.Entry(row1, textvariable=self.text_edit_var, width=28)
+        lbl_txt.pack(side=tk.LEFT, padx=(8, 4))
+        self.ent_text = ttk.Entry(row1, textvariable=self.text_edit_var, width=24)
         self.ent_text.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
         self.ent_text.bind("<KeyRelease>", self.on_text_edited)
 
-        # Row 2: Y-Axis Movement Slider
+        # Row 2: Text Wrapping Controls (Max Width & Auto-Wrap)
+        row_wrap = tk.Frame(pos_box, bg="#1E293B")
+        row_wrap.pack(fill=tk.X, pady=2)
+        self.enable_wrap_var = tk.BooleanVar(value=True)
+        chk_wrap = tk.Checkbutton(row_wrap, text="Auto-Wrap Text (Pure White BG)", variable=self.enable_wrap_var, bg="#1E293B", fg="#38BDF8", selectcolor="#0F172A", activebackground="#1E293B", activeforeground="#38BDF8", font=("Segoe UI", 8, "bold"), command=self.on_wrap_toggled)
+        chk_wrap.pack(side=tk.LEFT)
+
+        lbl_w_lim = tk.Label(row_wrap, text="Wrap Width:", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8))
+        lbl_w_lim.pack(side=tk.LEFT, padx=(10, 4))
+        self.wrap_width_var = tk.IntVar(value=620)
+        self.wrap_slider = ttk.Scale(row_wrap, from_=350, to=900, variable=self.wrap_width_var, command=self.on_wrap_slider_moved)
+        self.wrap_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
+        self.lbl_wrap_val = tk.Label(row_wrap, text="620px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 8, "bold"), width=6)
+        self.lbl_wrap_val.pack(side=tk.LEFT)
+
+        # Row 3: Y-Axis Movement Slider
         row_y = tk.Frame(pos_box, bg="#1E293B")
         row_y.pack(fill=tk.X, pady=2)
         lbl_y = tk.Label(row_y, text="Y-Axis (Up/Down):", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=16, anchor=tk.W)
@@ -320,7 +334,7 @@ class AutoVideoStudioApp(tk.Tk):
         self.lbl_y_val = tk.Label(row_y, text="120px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 9, "bold"), width=6)
         self.lbl_y_val.pack(side=tk.LEFT)
 
-        # Row 3: X-Axis Movement Slider
+        # Row 4: X-Axis Movement Slider
         row_x = tk.Frame(pos_box, bg="#1E293B")
         row_x.pack(fill=tk.X, pady=2)
         lbl_x = tk.Label(row_x, text="X-Axis (Left/Right):", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=16, anchor=tk.W)
@@ -330,7 +344,7 @@ class AutoVideoStudioApp(tk.Tk):
         self.lbl_x_val = tk.Label(row_x, text="960px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 9, "bold"), width=6)
         self.lbl_x_val.pack(side=tk.LEFT)
 
-        # Row 4: Size / Scale Slider & Save Button
+        # Row 5: Size / Scale Slider & Action Buttons
         row4 = tk.Frame(pos_box, bg="#1E293B")
         row4.pack(fill=tk.X, pady=2)
         lbl_sz = tk.Label(row4, text="Size (Decrease/Scale):", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=16, anchor=tk.W)
@@ -340,8 +354,14 @@ class AutoVideoStudioApp(tk.Tk):
         self.lbl_scale_val = tk.Label(row4, text="100%", bg="#1E293B", fg="#F59E0B", font=("Consolas", 9, "bold"), width=6)
         self.lbl_scale_val.pack(side=tk.LEFT)
 
-        btn_apply_pos = tk.Button(row4, text="💾 Save Changes for Scene", bg="#059669", fg="white", font=("Segoe UI", 8, "bold"), relief=tk.FLAT, padx=8, pady=2, command=self.save_current_position)
-        btn_apply_pos.pack(side=tk.LEFT, padx=(6, 0))
+        # Action Buttons: Save Current Scene & Save ALL Scenes At Once
+        row_btns = tk.Frame(pos_box, bg="#1E293B")
+        row_btns.pack(fill=tk.X, pady=(4, 2))
+        btn_apply_pos = tk.Button(row_btns, text="💾 Save Current Scene", bg="#059669", fg="white", font=("Segoe UI", 8, "bold"), relief=tk.FLAT, padx=8, pady=3, command=self.save_current_position)
+        btn_apply_pos.pack(side=tk.LEFT, padx=(0, 6))
+
+        btn_save_all = tk.Button(row_btns, text="💾 SAVE ALL SCENES AT ONCE", bg="#3B82F6", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, padx=12, pady=3, command=self.save_all_scenes)
+        btn_save_all.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
         # --- LEFT 3: 25 Animation Modes ---
         anim_box = tk.LabelFrame(left_frame, text=" 25 Animation Styles Engine ", bg="#1E293B", fg="#38BDF8", font=("Segoe UI", 10, "bold"), padx=10, pady=6)
@@ -449,6 +469,12 @@ class AutoVideoStudioApp(tk.Tk):
         self.scale_var.set(sc_val)
         self.lbl_scale_val.config(text=f"{int(sc_val*100)}%")
 
+        wrap_val = data.get("wrap_width", 620)
+        if hasattr(self, 'wrap_width_var'):
+            self.wrap_width_var.set(wrap_val if wrap_val else 620)
+            self.lbl_wrap_val.config(text=f"{wrap_val if wrap_val else 620}px")
+            self.enable_wrap_var.set(bool(wrap_val > 0))
+
         cur_text = data.get("text", "")
         if not cur_text and sc_num in DEFAULT_BADGE_MAP:
             cur_text = DEFAULT_BADGE_MAP[sc_num][0][1]
@@ -518,39 +544,60 @@ class AutoVideoStudioApp(tk.Tk):
         self.lbl_scale_val.config(text=f"{int(s_val*100)}%")
         self.preview_repositioned_badge()
 
+    def on_wrap_slider_moved(self, val):
+        w_val = int(float(val))
+        self.lbl_wrap_val.config(text=f"{w_val}px")
+        self.preview_repositioned_badge()
+
+    def on_wrap_toggled(self):
+        self.preview_repositioned_badge()
+
     def on_text_edited(self, event=None):
         self.preview_repositioned_badge()
 
-    def save_current_position(self):
+    def save_current_position(self, show_msg=True):
         sc_str = self.selected_scene_var.get()
+        if not sc_str:
+            return
         sc_num = sc_str.replace("Scene ", "").strip()
         new_x = self.x_pos_var.get()
         new_y = self.y_pos_var.get()
         new_scale = round(self.scale_var.get(), 2)
         new_text = self.text_edit_var.get().strip()
 
-        # Update disk badge PNG if text provided
+        # Update disk badge PNG in pure white background with text wrapping
         bname = f"p2_b{sc_num}.png"
-        if not os.path.exists(os.path.join(BADGE_DIR, bname)) and os.path.exists(os.path.join(BADGE_DIR, f"b{sc_num}.png")):
-            bname = f"b{sc_num}.png"
+        wrap_w = self.wrap_width_var.get() if (hasattr(self, 'enable_wrap_var') and self.enable_wrap_var.get()) else 0
 
         if new_text:
             orig_txt = ""
             if sc_num in DEFAULT_BADGE_MAP:
                 orig_txt = DEFAULT_BADGE_MAP[sc_num][0][1]
             if new_text != orig_txt or not os.path.exists(os.path.join(BADGE_DIR, bname)):
-                self.log(f"Rendering badge image for {sc_str}: '{new_text}'")
-                render_single_badge_to_disk(new_text, "#FAF6F0", "#1B2A4A", "#1B2A4A", 44, False, bname, overwrite=True)
+                self.log(f"Rendering badge image for {sc_str}: '{new_text}' (Pure White BG, Wrap={wrap_w}px)")
+                render_single_badge_to_disk(new_text, bg="#FFFFFF", txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67", fsize=44, strike=False, out_filename=bname, overwrite=True, wrap_width=wrap_w)
 
         self.badge_positions[sc_num] = {
             "x": new_x,
             "y": new_y,
             "scale": new_scale,
-            "text": new_text
+            "text": new_text,
+            "wrap_width": wrap_w
         }
         save_manual_positions(self.badge_positions)
         self.log(f"Saved settings for {sc_str}: X={new_x}px, Y={new_y}px, Scale={int(new_scale*100)}%, Text='{new_text}'")
-        messagebox.showinfo("Settings Saved", f"{sc_str} settings saved!\nX: {new_x}px | Y: {new_y}px | Scale: {int(new_scale*100)}%\nText: '{new_text}'\nWill be used on next render!")
+        if show_msg:
+            messagebox.showinfo("Settings Saved", f"{sc_str} settings saved!\nX: {new_x}px | Y: {new_y}px | Scale: {int(new_scale*100)}%\nText: '{new_text}'\nWill be used on next render!")
+
+    def save_all_scenes(self):
+        # First save current active scene from sliders and text field
+        self.save_current_position(show_msg=False)
+        
+        # Save all scenes into manual_badge_positions.json
+        save_manual_positions(self.badge_positions)
+        total_saved = len(self.badge_positions)
+        self.log(f"SUCCESS: Saved all settings across all {total_saved} scenes to manual_badge_positions.json!")
+        messagebox.showinfo("All Scenes Saved", f"Successfully saved settings across all {total_saved} scenes!\n\nAll X/Y coordinates, scaling, and text entries are permanently stored and ready for video rendering.")
 
     def preview_repositioned_badge(self):
         sc_str = self.selected_scene_var.get()

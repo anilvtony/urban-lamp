@@ -72,18 +72,22 @@ UNIVERSAL_LIBRARY = [
     ("COMMENT YOUR DOUBTS 💬", "#FFF8E7", "#1B2A4A", "#1B2A4A", 46, False),
 ]
 
-def render_single_badge_to_disk(text, bg="#F4C430", txt_col="#1B2A4A", border_col="#1B2A4A", fsize=46, strike=False, out_filename=None, overwrite=False):
+def render_single_badge_to_disk(text, bg="#FFFFFF", txt_col="#1B2A4A", border_col="#1B2A4A", shadow_col="#1B2A4A", fsize=44, strike=False, out_filename=None, overwrite=False, wrap_width=620, shape="card"):
     if out_filename is None:
-        # Create unique filename from text
         safe_name = re.sub(r'[^a-zA-Z0-9]', '_', text)[:25].strip('_')
         h = hashlib.md5(text.encode('utf-8')).hexdigest()[:6]
         out_filename = f"b_{safe_name}_{h}.png"
         
     out_path = os.path.join(BADGE_DIR, out_filename)
     if os.path.exists(out_path) and not overwrite:
-        return out_path  # Already exists locally, never re-generate unless forced
+        return out_path
 
     st_style = 'text-decoration: line-through; text-decoration-color: #C84B28; text-decoration-thickness: 5px;' if strike else ''
+    radius = "50px" if shape == "pill" else "18px"
+    
+    # Text wrapping style: max-width + word-break when text is long
+    wrap_css = f"max-width: {wrap_width}px; white-space: normal; word-break: keep-all; text-align: center; line-height: 1.35;" if wrap_width else "white-space: nowrap;"
+    
     html_content = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -108,16 +112,16 @@ body {{
 .badge {{
     background: {bg};
     border: 3.5px solid {border_col};
-    border-radius: 20px;
+    border-radius: {radius};
     padding: 16px 36px;
-    box-shadow: 6px 6px 0px {border_col};
+    box-shadow: 6px 6px 0px {shadow_col};
     font-family: 'Montserrat', 'Noto Sans Telugu', sans-serif;
     font-weight: 800;
     font-size: {fsize}px;
     color: {txt_col};
     letter-spacing: 0.5px;
     display: inline-block;
-    white-space: nowrap;
+    {wrap_css}
     {st_style}
 }}
 </style>
@@ -127,7 +131,7 @@ body {{
 </body>
 </html>"""
 
-    temp_id = hashlib.md5(text.encode('utf-8')).hexdigest()[:8]
+    temp_id = hashlib.md5((text + str(wrap_width) + bg + txt_col).encode('utf-8')).hexdigest()[:8]
     html_path = os.path.join(WORKSPACE, f"temp_{temp_id}.html")
     shot_path = os.path.join(WORKSPACE, f"shot_{temp_id}.png")
 
@@ -141,7 +145,7 @@ body {{
         "--hide-scrollbars",
         "--force-device-scale-factor=1",
         f"--screenshot={shot_path}",
-        "--window-size=1200,400",
+        "--window-size=1600,600",
         f"file:///{html_path.replace(os.sep, '/')}"
     ]
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
