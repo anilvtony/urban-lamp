@@ -14,47 +14,31 @@ from PIL import Image
 
 from animations_engine import ANIMATION_STYLES_LIST, render_badge_advanced, stamp_badge_final
 
-WIDTH = 1080
-HEIGHT = 1920
+WIDTH = 1920
+HEIGHT = 1080
 FPS = 30
 SAMPLE_RATE = 44100
 WORKSPACE = r"c:\Users\aanil\Documents\Auto_Video_Editing"
 BADGE_DIR = os.path.join(WORKSPACE, "rendered_badges")
-SERIES_ROOT = r"C:\Users\aanil\Documents\Anxious Anil\Shorts Videos\Projects\Fasting Series"
+SERIES_ROOT = r"C:\Users\aanil\Documents\Anxious Anil\Long Format Videos\Projects\Fasting Series"
 STATE_FILE = os.path.join(WORKSPACE, "animation_cycle_state.json")
 POSITIONS_FILE = os.path.join(WORKSPACE, "manual_badge_positions.json")
 
 def load_manual_positions():
-    default_positions = {
-        "1": {"x": 540, "y": 95, "scale": 1.0},
-        "2": {"x": 540, "y": 130, "scale": 1.0},
-        "3": {"x": 540, "y": 170, "scale": 1.0},
-        "4": {"x": 540, "y": 90, "scale": 1.0},
-        "5": {"x": 540, "y": 120, "scale": 1.0},
-        "6": {"x": 540, "y": 1600, "scale": 1.0},
-        "7": {"x": 540, "y": 120, "scale": 1.0},
-        "8_1": {"x": 540, "y": 110, "scale": 1.0},
-        "8_2": {"x": 540, "y": 250, "scale": 1.0},
-        "9": {"x": 540, "y": 170, "scale": 1.0},
-        "10": {"x": 540, "y": 1600, "scale": 1.0},
-        "11_1": {"x": 540, "y": 120, "scale": 1.0},
-        "11_2": {"x": 540, "y": 260, "scale": 1.0},
-        "12": {"x": 540, "y": 160, "scale": 1.0},
-        "13_1": {"x": 540, "y": 110, "scale": 1.0},
-        "13_2": {"x": 540, "y": 250, "scale": 1.0},
-        "14": {"x": 540, "y": 1600, "scale": 1.0}
-    }
+    default_positions = {}
+    for i in range(1, 35):
+        default_positions[str(i)] = {"x": 960, "y": 120, "scale": 1.0}
     if os.path.exists(POSITIONS_FILE):
         try:
             with open(POSITIONS_FILE, "r") as f:
                 saved = json.load(f)
                 for k, v in saved.items():
                     if isinstance(v, int):
-                        default_positions[k] = {"x": 540, "y": v, "scale": 1.0}
+                        default_positions[k] = {"x": 960, "y": v, "scale": 1.0}
                     elif isinstance(v, dict):
                         default_positions[k] = {
-                            "x": v.get("x", 540),
-                            "y": v.get("y", 90),
+                            "x": v.get("x", 960),
+                            "y": v.get("y", 120),
                             "scale": v.get("scale", 1.0)
                         }
         except Exception:
@@ -160,24 +144,24 @@ def main():
     print(f"Total Video Runtime: {total_duration:.2f} seconds ({int(total_duration * FPS)} frames)")
     
     pos = load_manual_positions()
-    # Configure scenes and badges positioned strictly on clean cream / negative background
-    # (badge_name, cfg_dict, enter_delay, exit_lead_time)
-    scenes_cfg = [
-        {"badges": [("p2_b1.png", pos.get("1", {"x": 540, "y": 95, "scale": 1.0}), 0.2, 0.25)]},
-        {"badges": [("p2_b2.png", pos.get("2", {"x": 540, "y": 130, "scale": 1.0}), 0.2, 0.25)]},
-        {"badges": [("p2_b3.png", pos.get("3", {"x": 540, "y": 170, "scale": 1.0}), 0.2, 0.25)]},
-        {"badges": [("p2_b4.png", pos.get("4", {"x": 540, "y": 90, "scale": 1.0}), 0.2, 0.25)]},
-        {"badges": [("p2_b5.png", pos.get("5", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25)]},
-        {"badges": [("p2_b6.png", pos.get("6", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
-        {"badges": [("p2_b7.png", pos.get("7", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25)]},
-        {"badges": [("p2_b8_1.png", pos.get("8_1", {"x": 540, "y": 110, "scale": 1.0}), 0.2, 0.25), ("p2_b8_2.png", pos.get("8_2", {"x": 540, "y": 250, "scale": 1.0}), 1.5, 0.25)]},
-        {"badges": [("p2_b9.png", pos.get("9", {"x": 540, "y": 170, "scale": 1.0}), 0.2, 0.25)]},
-        {"badges": [("p2_b10.png", pos.get("10", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
-        {"badges": [("p2_b11_1.png", pos.get("11_1", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25), ("p2_b11_2.png", pos.get("11_2", {"x": 540, "y": 260, "scale": 1.0}), 1.2, 0.25)]},
-        {"badges": [("p2_b12.png", pos.get("12", {"x": 540, "y": 160, "scale": 1.0}), 0.2, 0.25)]},
-        {"badges": [("p2_b13_1.png", pos.get("13_1", {"x": 540, "y": 110, "scale": 1.0}), 0.2, 0.25), ("p2_b13_2.png", pos.get("13_2", {"x": 540, "y": 250, "scale": 1.0}), 1.0, 0.25)]},
-        {"badges": [("p2_b14.png", pos.get("14", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
-    ]
+    # Configure scenes and badges positioned dynamically
+    scenes_cfg = []
+    for s_idx in range(num_scenes):
+        sc_num = str(s_idx + 1)
+        bcfg = pos.get(sc_num, {"x": WIDTH // 2, "y": 120, "scale": 1.0})
+        bname = f"p2_b{sc_num}.png"
+        if not os.path.exists(os.path.join(BADGE_DIR, bname)) and os.path.exists(os.path.join(BADGE_DIR, f"b{sc_num}.png")):
+            bname = f"b{sc_num}.png"
+        
+        if f"{sc_num}_1" in pos and f"{sc_num}_2" in pos:
+            cfg_1 = pos.get(f"{sc_num}_1", {"x": WIDTH // 2, "y": 110, "scale": 1.0})
+            cfg_2 = pos.get(f"{sc_num}_2", {"x": WIDTH // 2, "y": 250, "scale": 1.0})
+            scenes_cfg.append({"badges": [
+                (f"p2_b{sc_num}_1.png", cfg_1, 0.2, 0.25),
+                (f"p2_b{sc_num}_2.png", cfg_2, 1.2, 0.25)
+            ]})
+        else:
+            scenes_cfg.append({"badges": [(bname, bcfg, 0.2, 0.25)]})
 
     out_mp4 = os.path.join(WORKSPACE, f"Fasting_Series_{style_idx+1}_{chosen_style}.mp4")
     temp_video = os.path.join(WORKSPACE, "temp_video_stream.mp4")

@@ -42,28 +42,30 @@ except Exception:
 
 from animations_engine import ANIMATION_STYLES_LIST, render_badge_advanced, stamp_badge_final
 
-WIDTH = 1080
-HEIGHT = 1920
+WIDTH = 1920
+HEIGHT = 1080
 FPS = 30
 SAMPLE_RATE = 44100
 WORKSPACE = r"c:\Users\aanil\Documents\Auto_Video_Editing"
 BADGE_DIR = os.path.join(WORKSPACE, "rendered_badges")
-SERIES_ROOT = r"C:\Users\aanil\Documents\Anxious Anil\Shorts Videos\Projects\Fasting Series"
+LONG_FORMAT_ROOT = r"C:\Users\aanil\Documents\Anxious Anil\Long Format Videos\Projects\Fasting Series"
+SHORTS_ROOT = r"C:\Users\aanil\Documents\Anxious Anil\Shorts Videos\Projects\Fasting Series"
 STATE_FILE = os.path.join(WORKSPACE, "animation_cycle_state.json")
 POSITIONS_FILE = os.path.join(WORKSPACE, "manual_badge_positions.json")
 PREVIEW_AUDIO_WAV = os.path.join(WORKSPACE, "temp_preview_audio.wav")
 
-def detect_latest_project_folder(root_dir=SERIES_ROOT):
-    if not os.path.exists(root_dir):
-        return None
-    subdirs = [os.path.join(root_dir, d) for d in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, d))]
-    valid_subdirs = [
-        d for d in subdirs 
-        if os.path.isdir(os.path.join(d, "Images")) and os.path.isdir(os.path.join(d, "Audio"))
-    ]
-    if not valid_subdirs:
-        return None
-    return max(valid_subdirs, key=os.path.getmtime)
+def detect_latest_project_folder(root_dir=LONG_FORMAT_ROOT):
+    # Try Long Format first as requested, then fallback to Shorts if not found
+    for r in [root_dir, LONG_FORMAT_ROOT, SHORTS_ROOT]:
+        if os.path.exists(r):
+            subdirs = [os.path.join(r, d) for d in os.listdir(r) if os.path.isdir(os.path.join(r, d))]
+            valid_subdirs = [
+                d for d in subdirs 
+                if os.path.isdir(os.path.join(d, "Images")) and os.path.isdir(os.path.join(d, "Audio"))
+            ]
+            if valid_subdirs:
+                return max(valid_subdirs, key=os.path.getmtime)
+    return None
 
 def get_next_cycle_style():
     state = {"last_index": -1}
@@ -213,7 +215,7 @@ class AutoVideoStudioApp(tk.Tk):
             if mp4s:
                 default_out = os.path.join(latest_folder, mp4s[0])
             else:
-                default_out = os.path.join(WORKSPACE, "Fasting_Series_Latest.mp4")
+                default_out = os.path.join(latest_folder, "Fasting_Series_LongFormat.mp4")
         else:
             default_img = ""
             default_aud = ""
@@ -229,13 +231,17 @@ class AutoVideoStudioApp(tk.Tk):
         self.anim_mode_var = tk.StringVar(value=f"Cycle Style Per Video (Next: {next_s})")
         self.enable_anim_var = tk.BooleanVar(value=True)
 
+        # Detect scenes from images
+        init_scenes = self.get_detected_scenes(default_img)
+        self.scenes_list = init_scenes if init_scenes else [f"Scene {i}" for i in range(1, 31)]
+
         # Badge Positions and Editing
         self.badge_positions = load_manual_positions()
-        self.selected_scene_var = tk.StringVar(value="Scene 4")
-        self.x_pos_var = tk.IntVar(value=540)
-        self.y_pos_var = tk.IntVar(value=90)
+        self.selected_scene_var = tk.StringVar(value=self.scenes_list[0] if self.scenes_list else "Scene 1")
+        self.x_pos_var = tk.IntVar(value=960)
+        self.y_pos_var = tk.IntVar(value=120)
         self.scale_var = tk.DoubleVar(value=1.0)
-        self.text_edit_var = tk.StringVar(value="16 HRS = BACKUP SYSTEM ON! ⚡")
+        self.text_edit_var = tk.StringVar(value="")
 
         # Video Player state
         self.cap = None
@@ -249,6 +255,7 @@ class AutoVideoStudioApp(tk.Tk):
         self.play_start_frame = 0
 
         self.create_widgets()
+        self.update_scene_editor_fields()
         
         # Auto-load video if available
         if os.path.exists(self.out_video_var.get()):
@@ -309,9 +316,9 @@ class AutoVideoStudioApp(tk.Tk):
         row_y.pack(fill=tk.X, pady=2)
         lbl_y = tk.Label(row_y, text="Y-Axis (Up/Down):", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=16, anchor=tk.W)
         lbl_y.pack(side=tk.LEFT)
-        self.y_slider = ttk.Scale(row_y, from_=50, to=1750, variable=self.y_pos_var, command=self.on_y_slider_moved)
+        self.y_slider = ttk.Scale(row_y, from_=40, to=1040, variable=self.y_pos_var, command=self.on_y_slider_moved)
         self.y_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
-        self.lbl_y_val = tk.Label(row_y, text="90px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 9, "bold"), width=6)
+        self.lbl_y_val = tk.Label(row_y, text="120px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 9, "bold"), width=6)
         self.lbl_y_val.pack(side=tk.LEFT)
 
         # Row 3: X-Axis Movement Slider
@@ -319,9 +326,9 @@ class AutoVideoStudioApp(tk.Tk):
         row_x.pack(fill=tk.X, pady=2)
         lbl_x = tk.Label(row_x, text="X-Axis (Left/Right):", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=16, anchor=tk.W)
         lbl_x.pack(side=tk.LEFT)
-        self.x_slider = ttk.Scale(row_x, from_=100, to=980, variable=self.x_pos_var, command=self.on_x_slider_moved)
+        self.x_slider = ttk.Scale(row_x, from_=80, to=1840, variable=self.x_pos_var, command=self.on_x_slider_moved)
         self.x_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
-        self.lbl_x_val = tk.Label(row_x, text="540px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 9, "bold"), width=6)
+        self.lbl_x_val = tk.Label(row_x, text="960px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 9, "bold"), width=6)
         self.lbl_x_val.pack(side=tk.LEFT)
 
         # Row 4: Size / Scale Slider & Save Button
@@ -366,13 +373,13 @@ class AutoVideoStudioApp(tk.Tk):
         scroll.pack(side=tk.RIGHT, fill=tk.Y)
         self.txt_log['yscrollcommand'] = scroll.set
 
-        # --- RIGHT: Video Preview Player (9:16 Canvas & Synchronized Audio) ---
-        lbl_p_title = tk.Label(right_frame, text="📺 Video Preview Player (Synchronized Audio)", bg="#1E293B", fg="#F59E0B", font=("Segoe UI", 11, "bold"))
+        # --- RIGHT: Video Preview Player (16:9 Canvas & Synchronized Audio) ---
+        lbl_p_title = tk.Label(right_frame, text="📺 16:9 Video Preview Player (Synchronized Audio)", bg="#1E293B", fg="#F59E0B", font=("Segoe UI", 11, "bold"))
         lbl_p_title.pack(pady=(8, 2))
 
-        # 9:16 Canvas
-        self.canvas_w = 270
-        self.canvas_h = 480
+        # 16:9 Canvas (480x270)
+        self.canvas_w = 480
+        self.canvas_h = 270
         self.preview_canvas = tk.Canvas(right_frame, width=self.canvas_w, height=self.canvas_h, bg="#000000", highlightthickness=0)
         self.preview_canvas.pack(pady=4)
 
@@ -407,6 +414,48 @@ class AutoVideoStudioApp(tk.Tk):
         btn_open = tk.Button(right_frame, text="📂 Open In Default Player", bg="#334155", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, padx=10, command=self.open_external_video)
         btn_open.pack(pady=(2, 8))
 
+    def get_detected_scenes(self, img_folder):
+        if not img_folder or not os.path.exists(img_folder):
+            return []
+        imgs = sorted([f for f in os.listdir(img_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
+        return [f"Scene {i+1}" for i in range(len(imgs))]
+
+    def refresh_scene_list(self):
+        img_folder = self.img_dir_var.get()
+        detected = self.get_detected_scenes(img_folder)
+        if detected:
+            self.scenes_list = detected
+            self.cmb_scene['values'] = self.scenes_list
+            cur = self.selected_scene_var.get()
+            if cur not in self.scenes_list:
+                self.selected_scene_var.set(self.scenes_list[0])
+            self.update_scene_editor_fields()
+
+    def update_scene_editor_fields(self):
+        sc_str = self.selected_scene_var.get()
+        if not sc_str:
+            return
+        sc_num = sc_str.replace("Scene ", "").strip()
+        data = self.badge_positions.get(sc_num, {"x": WIDTH // 2, "y": 120, "scale": 1.0, "text": ""})
+        if isinstance(data, int):
+            data = {"x": WIDTH // 2, "y": data, "scale": 1.0, "text": ""}
+
+        self.y_pos_var.set(data.get("y", 120))
+        self.lbl_y_val.config(text=f"{data.get('y', 120)}px")
+
+        self.x_pos_var.set(data.get("x", WIDTH // 2))
+        self.lbl_x_val.config(text=f"{data.get('x', WIDTH // 2)}px")
+
+        sc_val = data.get("scale", 1.0)
+        self.scale_var.set(sc_val)
+        self.lbl_scale_val.config(text=f"{int(sc_val*100)}%")
+
+        cur_text = data.get("text", "")
+        if not cur_text and sc_num in DEFAULT_BADGE_MAP:
+            cur_text = DEFAULT_BADGE_MAP[sc_num][0][1]
+        self.text_edit_var.set(cur_text)
+        self.preview_repositioned_badge()
+
     def refresh_latest_folder(self):
         latest = detect_latest_project_folder()
         if latest:
@@ -416,6 +465,9 @@ class AutoVideoStudioApp(tk.Tk):
             if mp4s:
                 self.out_video_var.set(os.path.join(latest, mp4s[0]))
                 self.load_video_file(os.path.join(latest, mp4s[0]))
+            else:
+                self.out_video_var.set(os.path.join(latest, "Fasting_Series_LongFormat.mp4"))
+            self.refresh_scene_list()
             self.log(f"Auto-detected latest folder: {latest}")
             messagebox.showinfo("Project Detected", f"Auto-selected latest project:\n{os.path.basename(latest)}")
         else:
@@ -435,11 +487,13 @@ class AutoVideoStudioApp(tk.Tk):
         self.txt_log.see(tk.END)
 
     def browse_img_dir(self):
-        d = filedialog.askdirectory(initialdir=SERIES_ROOT, title="Select Images Directory")
-        if d: self.img_dir_var.set(d)
+        d = filedialog.askdirectory(initialdir=LONG_FORMAT_ROOT, title="Select Images Directory")
+        if d:
+            self.img_dir_var.set(d)
+            self.refresh_scene_list()
 
     def browse_aud_dir(self):
-        d = filedialog.askdirectory(initialdir=SERIES_ROOT, title="Select Audio Directory")
+        d = filedialog.askdirectory(initialdir=LONG_FORMAT_ROOT, title="Select Audio Directory")
         if d: self.aud_dir_var.set(d)
 
     def browse_out_video(self):
@@ -448,29 +502,7 @@ class AutoVideoStudioApp(tk.Tk):
 
     # --- BADGE REPOSITIONING & EDITING LOGIC ---
     def on_scene_selected(self, event=None):
-        sc_str = self.selected_scene_var.get()
-        sc_num = sc_str.replace("Scene ", "").strip()
-        data = self.badge_positions.get(sc_num, {"x": 540, "y": 90, "scale": 1.0, "text": ""})
-        if isinstance(data, int):
-            data = {"x": 540, "y": data, "scale": 1.0, "text": ""}
-        
-        self.y_pos_var.set(data.get("y", 90))
-        self.lbl_y_val.config(text=f"{data.get('y', 90)}px")
-        
-        self.x_pos_var.set(data.get("x", 540))
-        self.lbl_x_val.config(text=f"{data.get('x', 540)}px")
-        
-        sc_val = data.get("scale", 1.0)
-        self.scale_var.set(sc_val)
-        self.lbl_scale_val.config(text=f"{int(sc_val*100)}%")
-        
-        # Populate text
-        cur_text = data.get("text", "")
-        if not cur_text and sc_num in DEFAULT_BADGE_MAP:
-            cur_text = DEFAULT_BADGE_MAP[sc_num][0][1]
-        self.text_edit_var.set(cur_text)
-        
-        self.preview_repositioned_badge()
+        self.update_scene_editor_fields()
 
     def on_y_slider_moved(self, val):
         y_val = int(float(val))
@@ -498,12 +530,18 @@ class AutoVideoStudioApp(tk.Tk):
         new_scale = round(self.scale_var.get(), 2)
         new_text = self.text_edit_var.get().strip()
 
-        # Update disk badge PNG if text changed
-        if sc_num in DEFAULT_BADGE_MAP and new_text:
-            bname, orig_txt, bg, tc, bc, fs, st = DEFAULT_BADGE_MAP[sc_num][0]
-            if new_text != orig_txt:
-                self.log(f"Re-rendering badge image for {sc_str} with text: '{new_text}'")
-                render_single_badge_to_disk(new_text, bg, tc, bc, fs, st, bname, overwrite=True)
+        # Update disk badge PNG if text provided
+        bname = f"p2_b{sc_num}.png"
+        if not os.path.exists(os.path.join(BADGE_DIR, bname)) and os.path.exists(os.path.join(BADGE_DIR, f"b{sc_num}.png")):
+            bname = f"b{sc_num}.png"
+
+        if new_text:
+            orig_txt = ""
+            if sc_num in DEFAULT_BADGE_MAP:
+                orig_txt = DEFAULT_BADGE_MAP[sc_num][0][1]
+            if new_text != orig_txt or not os.path.exists(os.path.join(BADGE_DIR, bname)):
+                self.log(f"Rendering badge image for {sc_str}: '{new_text}'")
+                render_single_badge_to_disk(new_text, "#FAF6F0", "#1B2A4A", "#1B2A4A", 44, False, bname, overwrite=True)
 
         self.badge_positions[sc_num] = {
             "x": new_x,
@@ -517,11 +555,20 @@ class AutoVideoStudioApp(tk.Tk):
 
     def preview_repositioned_badge(self):
         sc_str = self.selected_scene_var.get()
+        if not sc_str:
+            return
         sc_num = int(sc_str.replace("Scene ", "").strip())
         img_dir = self.img_dir_var.get()
+        
+        # Locate image file
         img_p = os.path.join(img_dir, f"Image_{sc_num:03d}.png")
         if not os.path.exists(img_p):
-            return
+            # Check other image extensions or listing
+            all_imgs = sorted([f for f in os.listdir(img_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]) if os.path.exists(img_dir) else []
+            if sc_num - 1 < len(all_imgs):
+                img_p = os.path.join(img_dir, all_imgs[sc_num - 1])
+            else:
+                return
 
         im = Image.open(img_p).convert('RGB')
         w, h = im.size
@@ -530,9 +577,15 @@ class AutoVideoStudioApp(tk.Tk):
         im_res = im.resize((nw, nh), Image.LANCZOS).crop(((nw-WIDTH)//2, (nh-HEIGHT)//2, (nw-WIDTH)//2+WIDTH, (nh-HEIGHT)//2+HEIGHT))
 
         # Check badge
-        bname = f"p2_b{sc_num}.png"
-        bpath = os.path.join(BADGE_DIR, bname)
-        if os.path.exists(bpath):
+        candidates = [f"p2_b{sc_num}.png", f"b{sc_num}.png"]
+        bpath = None
+        for cand in candidates:
+            p = os.path.join(BADGE_DIR, cand)
+            if os.path.exists(p):
+                bpath = p
+                break
+
+        if bpath and os.path.exists(bpath):
             b_im = Image.open(bpath).convert('RGBA')
             
             # Apply scale if modified
@@ -548,7 +601,7 @@ class AutoVideoStudioApp(tk.Tk):
             y = y_cur - b_im.height // 2
             im_res.paste(b_im, (x, y), b_im)
 
-        # Show on canvas
+        # Show on canvas (16:9 480x270)
         rgb_frame = np.array(im_res)
         resized = cv2.resize(rgb_frame, (self.canvas_w, self.canvas_h), interpolation=cv2.INTER_AREA)
         im_pil = Image.fromarray(resized)
@@ -796,22 +849,27 @@ class AutoVideoStudioApp(tk.Tk):
 
             # Scenes badge configuration mapping with loaded manual positions
             pos = self.badge_positions
-            scenes_cfg = [
-                {"badges": [("p2_b1.png", pos.get("1", {"x": 540, "y": 95, "scale": 1.0}), 0.2, 0.25)]},
-                {"badges": [("p2_b2.png", pos.get("2", {"x": 540, "y": 130, "scale": 1.0}), 0.2, 0.25)]},
-                {"badges": [("p2_b3.png", pos.get("3", {"x": 540, "y": 170, "scale": 1.0}), 0.2, 0.25)]},
-                {"badges": [("p2_b4.png", pos.get("4", {"x": 540, "y": 90, "scale": 1.0}), 0.2, 0.25)]},
-                {"badges": [("p2_b5.png", pos.get("5", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25)]},
-                {"badges": [("p2_b6.png", pos.get("6", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
-                {"badges": [("p2_b7.png", pos.get("7", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25)]},
-                {"badges": [("p2_b8_1.png", pos.get("8_1", {"x": 540, "y": 110, "scale": 1.0}), 0.2, 0.25), ("p2_b8_2.png", pos.get("8_2", {"x": 540, "y": 250, "scale": 1.0}), 1.5, 0.25)]},
-                {"badges": [("p2_b9.png", pos.get("9", {"x": 540, "y": 170, "scale": 1.0}), 0.2, 0.25)]},
-                {"badges": [("p2_b10.png", pos.get("10", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
-                {"badges": [("p2_b11_1.png", pos.get("11_1", {"x": 540, "y": 120, "scale": 1.0}), 0.2, 0.25), ("p2_b11_2.png", pos.get("11_2", {"x": 540, "y": 260, "scale": 1.0}), 1.2, 0.25)]},
-                {"badges": [("p2_b12.png", pos.get("12", {"x": 540, "y": 160, "scale": 1.0}), 0.2, 0.25)]},
-                {"badges": [("p2_b13_1.png", pos.get("13_1", {"x": 540, "y": 110, "scale": 1.0}), 0.2, 0.25), ("p2_b13_2.png", pos.get("13_2", {"x": 540, "y": 250, "scale": 1.0}), 1.0, 0.25)]},
-                {"badges": [("p2_b14.png", pos.get("14", {"x": 540, "y": 1600, "scale": 1.0}), 0.2, 0.25)]},
-            ]
+            scenes_cfg = []
+            for s_idx in range(num_scenes):
+                sc_num = str(s_idx + 1)
+                bcfg = pos.get(sc_num, {"x": WIDTH // 2, "y": 120, "scale": 1.0})
+                
+                # Check for available badge image
+                bname = f"p2_b{sc_num}.png"
+                if not os.path.exists(os.path.join(BADGE_DIR, bname)):
+                    if os.path.exists(os.path.join(BADGE_DIR, f"b{sc_num}.png")):
+                        bname = f"b{sc_num}.png"
+                
+                # If scene has a sub-badge configuration (e.g. 8_1, 8_2 or 11_1, 11_2)
+                if f"{sc_num}_1" in pos and f"{sc_num}_2" in pos:
+                    cfg_1 = pos.get(f"{sc_num}_1", {"x": WIDTH // 2, "y": 110, "scale": 1.0})
+                    cfg_2 = pos.get(f"{sc_num}_2", {"x": WIDTH // 2, "y": 250, "scale": 1.0})
+                    scenes_cfg.append({"badges": [
+                        (f"p2_b{sc_num}_1.png", cfg_1, 0.2, 0.25),
+                        (f"p2_b{sc_num}_2.png", cfg_2, 1.2, 0.25)
+                    ]})
+                else:
+                    scenes_cfg.append({"badges": [(bname, bcfg, 0.2, 0.25)]})
 
             ffmpeg_cmd = [
                 'ffmpeg', '-y',
