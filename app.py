@@ -656,9 +656,16 @@ class AutoVideoStudioApp(tk.Tk):
             orig_txt = ""
             if sc_num in DEFAULT_BADGE_MAP:
                 orig_txt = DEFAULT_BADGE_MAP[sc_num][0][1]
+            # Use original theme colors from Editing Directions based on scene number
+            try:
+                sc_int = int(sc_num)
+            except Exception:
+                sc_int = 1
+            bg_col = "#EADBC8" if (sc_int % 2 != 0) else "#FAF8F5"
+
             if new_text != orig_txt or not os.path.exists(os.path.join(BADGE_DIR, bname)) or wrap_w > 0:
-                self.log(f"Rendering high-precision badge image for {sc_str}: '{new_text}' (Pure White BG, Wrap={wrap_w}px)")
-                render_single_badge_to_disk(new_text, bg="#FFFFFF", txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67", fsize=44, strike=False, out_filename=bname, overwrite=True, wrap_width=wrap_w)
+                self.log(f"Rendering high-precision badge image for {sc_str}: '{new_text}' (BG={bg_col}, Wrap={wrap_w}px)")
+                render_single_badge_to_disk(new_text, bg=bg_col, txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67", fsize=44, strike=False, out_filename=bname, overwrite=True, wrap_width=wrap_w)
                 self.preview_repositioned_badge()
 
         self.badge_positions[sc_num] = {
@@ -727,7 +734,12 @@ class AutoVideoStudioApp(tk.Tk):
             cur_text = self.text_edit_var.get().strip()
             wrap_w = self.wrap_width_var.get() if (hasattr(self, 'enable_wrap_var') and self.enable_wrap_var.get()) else 0
             if cur_text:
-                b_im = render_dynamic_preview_badge(cur_text, wrap_width=wrap_w, bg="#FFFFFF", txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67")
+                try:
+                    sc_int = int(sc_num)
+                except Exception:
+                    sc_int = 1
+                bg_col = "#EADBC8" if (sc_int % 2 != 0) else "#FAF8F5"
+                b_im = render_dynamic_preview_badge(cur_text, wrap_width=wrap_w, bg=bg_col, txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67")
 
         if b_im is not None:
             # Apply scale if modified
