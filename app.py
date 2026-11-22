@@ -88,45 +88,44 @@ def advance_cycle_style():
 from badge_catalog_manager import render_single_badge_to_disk
 
 DEFAULT_BADGE_MAP = {
-    "1": [("p2_b1.png", "Welcome Back! 👋", "#E8B931", "#1B2A4A", "#1B2A4A", 46, False)],
-    "2": [("p2_b2.png", "ఆకలితో ఉండటమే Fasting ఆ?", "#FAF6F0", "#1B2A4A", "#1B2A4A", 44, False)],
-    "3": [("p2_b3.png", "Digestive Systemకి Rest ఏదీ?", "#E8B931", "#1B2A4A", "#1B2A4A", 44, False)],
-    "4": [("p2_b4.png", "16 HRS = BACKUP SYSTEM ON! ⚡", "#FAF6F0", "#C84B28", "#C84B28", 42, False)],
-    "5": [("p2_b5.png", "తినడం ఆపితే లోపల ఏం జరుగుతుంది?", "#E8B931", "#1B2A4A", "#1B2A4A", 42, False)],
-    "6": [("p2_b6.png", "Simpleగా Break Down చేద్దాం!", "#5B8C5A", "#1B2A4A", "#1B2A4A", 44, False)],
-    "7": [("p2_b7.png", "Glucose = Direct Phone Charger", "#FAF6F0", "#1B2A4A", "#1B2A4A", 42, False)],
-    "8_1": [("p2_b8_1.png", "INSULIN ⬇", "#FAF6F0", "#1B2A4A", "#1B2A4A", 44, False)],
-    "8_2": [("p2_b8_2.png", "FAT CELLS OPEN 🔑", "#E8B931", "#1B2A4A", "#1B2A4A", 44, False)],
-    "9": [("p2_b9.png", "Insulin Down = Fat Unlock Signal", "#FAF6F0", "#1B2A4A", "#1B2A4A", 42, False)],
-    "10": [("p2_b10.png", "16 Hours: Autophagy Cleaning!", "#E8B931", "#C84B28", "#1B2A4A", 42, False)],
-    "11_1": [("p2_b11_1.png", "GLUCOSE = CASH 💵", "#5B8C5A", "#1B2A4A", "#1B2A4A", 44, False)],
-    "11_2": [("p2_b11_2.png", "FAT = BANK FD 🏦", "#E8B931", "#1B2A4A", "#1B2A4A", 44, False)],
-    "12": [("p2_b12.png", "నిద్రలోనూ చిన్న Fasting జరుగుతుంది...", "#FAF6F0", "#1B2A4A", "#1B2A4A", 42, False)],
-    "13_1": [("p2_b13_1.png", "BODY WEAK అవ్వదు! 💪", "#E8B931", "#1B2A4A", "#1B2A4A", 44, False)],
-    "13_2": [("p2_b13_2.png", "FREE CLEANING BREAK!", "#E8B931", "#C84B28", "#1B2A4A", 46, False)],
-    "14": [("p2_b14.png", "Subscribe & Comment Below!", "#FAF6F0", "#1B2A4A", "#1B2A4A", 44, False)]
+    "1": [("p2_b1.png", "Intermittent Fasting పూర్తి వివరణ", "#EADBC8", "#2B3A67", "#2B3A67", 46, False)],
+    "2": [("p2_b2.png", "ఇది Diet కాదు — Eating Schedule!", "#FAF8F5", "#C85A32", "#2B3A67", 46, False)],
+    "3": [("p2_b3.png", "16/8, 5:2, OMAD — ఇన్ని రకాలా?", "#EADBC8", "#2B3A67", "#2B3A67", 46, False)],
+    "4": [("p2_b4.png", "తప్పు Method ఎంచుకుంటే నీరసం!", "#FAF8F5", "#C85A32", "#2B3A67", 46, False)],
+    "5": [("p2_b5.png", "మీ Bodyకి ఏది సరిపోతుంది?", "#EADBC8", "#2B3A67", "#2B3A67", 46, False)],
+    "6": [("p2_b6.png", "Simpleగా Break Down చేద్దాం!", "#FAF8F5", "#2E7D7B", "#2B3A67", 46, False)],
+    "7": [("p2_b7.png", "కడుపుకి Fixed Opening & Closing Time", "#EADBC8", "#2B3A67", "#2B3A67", 44, False)],
+    "8": [("p2_b8.png", "Food ఆగిపోయాకే Body Cleaning!", "#FAF8F5", "#2E7D7B", "#2B3A67", 46, False)],
+    "9": [("p2_b9.png", "కడుపు మాడ్చుకోవడం కాదు — Smart Routine", "#EADBC8", "#2B3A67", "#2B3A67", 44, False)],
+    "10": [("p2_b10.png", "16/8 Method: 16 Hrs Off, 8 Hrs On", "#EADBC8", "#2B3A67", "#2B3A67", 44, False)],
+    "11": [("p2_b11.png", "8 Hours నిద్రలోనే గడిచిపోతాయి!", "#FAF8F5", "#2E7D7B", "#2B3A67", 46, False)],
+    "12": [("p2_b12.png", "అందరి ఫస్ట్ ఛాయిస్: 16/8", "#EADBC8", "#2B3A67", "#2B3A67", 46, False)],
+    "13": [("p2_b13.png", "Beginners కోసం 12/12 Method", "#FAF8F5", "#2E7D7B", "#2B3A67", 46, False)],
+    "14": [("p2_b14.png", "మెల్లగా 14/10 కి Step Up!", "#EADBC8", "#2B3A67", "#2B3A67", 46, False)],
+    "15": [("p2_b15.png", "12/12 తో స్టార్ట్ చేయడం Safe!", "#FAF8F5", "#2B3A67", "#2B3A67", 46, False)],
+    "16": [("p2_b16.png", "5:2 Diet: 5 Days Normal, 2 Days Low", "#EADBC8", "#C85A32", "#2B3A67", 44, False)],
+    "17": [("p2_b17.png", "రెండు రోజుల మధ్య Gap తప్పనిసరి!", "#FAF8F5", "#2B3A67", "#2B3A67", 46, False)],
+    "18": [("p2_b18.png", "రోజూ కుదరని వాళ్లకి 5:2 Best", "#EADBC8", "#2E7D7B", "#2B3A67", 46, False)],
+    "19": [("p2_b19.png", "Eat-Stop-Eat: 24 Hours Deep Reset", "#FAF8F5", "#2B3A67", "#2B3A67", 44, False)],
+    "20": [("p2_b20.png", "Alternate Day: రోజు విడిచి రోజు", "#EADBC8", "#C85A32", "#2B3A67", 46, False)],
+    "21": [("p2_b21.png", "Beginners ఇవి వెంటనే Try చేయొద్దు!", "#FAF8F5", "#C85A32", "#2B3A67", 46, False)],
+    "22": [("p2_b22.png", "Warrior Diet: 20 Hrs Fast / 4 Hrs Eat", "#EADBC8", "#2B3A67", "#2B3A67", 44, False)],
+    "23": [("p2_b23.png", "OMAD: రోజుకి ఒక్కసారే భోజనం!", "#FAF8F5", "#C85A32", "#2B3A67", 46, False)],
+    "24": [("p2_b24.png", "పోషకాలు అందకపోయే Risk ఉంది", "#EADBC8", "#C85A32", "#2B3A67", 46, False)],
+    "25": [("p2_b25.png", "అందరికీ ఒకే Method సరిపోదు!", "#FAF8F5", "#2B3A67", "#2B3A67", 46, False)],
+    "26": [("p2_b26.png", "డాక్టర్ సలహా లేకుండా Risk వద్దు!", "#EADBC8", "#C85A32", "#2B3A67", 46, False)],
+    "27": [("p2_b27.png", "Protein + Fiber + Water మర్చిపోవద్దు", "#FAF8F5", "#2E7D7B", "#2B3A67", 44, False)],
+    "28": [("p2_b28.png", "అసలు నిజం ఏంటంటే...", "#EADBC8", "#2B3A67", "#2B3A67", 46, False)],
+    "29": [("p2_b29.png", "లాంగ్ టర్మ్‌లో ఫాలో అయ్యేదే BEST!", "#EADBC8", "#C85A32", "#2B3A67", 46, False)],
+    "30": [("p2_b30.png", "Subscribe & Comment Below!", "#FAF8F5", "#2B3A67", "#2B3A67", 46, False)],
 }
 
 def load_manual_positions():
-    default_positions = {
-        "1": {"x": 540, "y": 95, "scale": 1.0, "text": "Welcome Back! 👋"},
-        "2": {"x": 540, "y": 130, "scale": 1.0, "text": "ఆకలితో ఉండటమే Fasting ఆ?"},
-        "3": {"x": 540, "y": 170, "scale": 1.0, "text": "Digestive Systemకి Rest ఏదీ?"},
-        "4": {"x": 540, "y": 90, "scale": 1.0, "text": "16 HRS = BACKUP SYSTEM ON! ⚡"},
-        "5": {"x": 540, "y": 120, "scale": 1.0, "text": "తినడం ఆపితే లోపల ఏం జరుగుతుంది?"},
-        "6": {"x": 540, "y": 1600, "scale": 1.0, "text": "Simpleగా Break Down చేద్దాం!"},
-        "7": {"x": 540, "y": 120, "scale": 1.0, "text": "Glucose = Direct Phone Charger"},
-        "8_1": {"x": 540, "y": 110, "scale": 1.0, "text": "INSULIN ⬇"},
-        "8_2": {"x": 540, "y": 250, "scale": 1.0, "text": "FAT CELLS OPEN 🔑"},
-        "9": {"x": 540, "y": 170, "scale": 1.0, "text": "Insulin Down = Fat Unlock Signal"},
-        "10": {"x": 540, "y": 1600, "scale": 1.0, "text": "16 Hours: Autophagy Cleaning!"},
-        "11_1": {"x": 540, "y": 120, "scale": 1.0, "text": "GLUCOSE = CASH 💵"},
-        "11_2": {"x": 540, "y": 260, "scale": 1.0, "text": "FAT = BANK FD 🏦"},
-        "12": {"x": 540, "y": 160, "scale": 1.0, "text": "నిద్రలోనూ చిన్న Fasting జరుగుతుంది..."},
-        "13_1": {"x": 540, "y": 110, "scale": 1.0, "text": "BODY WEAK అవ్వదు! 💪"},
-        "13_2": {"x": 540, "y": 250, "scale": 1.0, "text": "FREE CLEANING BREAK!"},
-        "14": {"x": 540, "y": 1600, "scale": 1.0, "text": "Subscribe & Comment Below!"}
-    }
+    default_positions = {}
+    for i in range(1, 35):
+        s_i = str(i)
+        t_val = DEFAULT_BADGE_MAP[s_i][0][1] if s_i in DEFAULT_BADGE_MAP else ""
+        default_positions[s_i] = {"x": 960, "y": 120, "scale": 1.0, "text": t_val}
     if os.path.exists(POSITIONS_FILE):
         try:
             with open(POSITIONS_FILE, "r") as f:
