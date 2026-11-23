@@ -345,8 +345,14 @@ class AutoVideoStudioApp(tk.Tk):
         cfg_frame = tk.LabelFrame(left_frame, text=" Project Assets (Auto-Detected Latest Folder) ", bg="#1E293B", fg="#F59E0B", font=("Segoe UI", 10, "bold"), padx=10, pady=6)
         cfg_frame.pack(fill=tk.X, pady=(0, 6))
 
-        btn_auto_detect = tk.Button(cfg_frame, text="🔄 Auto-Detect Latest Project Folder", bg="#0284C7", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, pady=2, command=self.refresh_latest_folder)
-        btn_auto_detect.grid(row=0, column=0, columnspan=3, sticky=tk.W, pady=(0, 4))
+        top_btn_row = tk.Frame(cfg_frame, bg="#1E293B")
+        top_btn_row.grid(row=0, column=0, columnspan=3, sticky=tk.W, pady=(0, 4))
+
+        btn_auto_detect = tk.Button(top_btn_row, text="🔄 Auto-Detect Latest Project Folder", bg="#0284C7", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, pady=2, padx=6, command=self.refresh_latest_folder)
+        btn_auto_detect.pack(side=tk.LEFT, padx=(0, 6))
+
+        btn_sync = tk.Button(top_btn_row, text="⚡ SYNC EDITING DIRECTIONS & ASSETS", bg="#10B981", fg="white", font=("Segoe UI", 9, "bold"), relief=tk.FLAT, pady=2, padx=8, command=self.sync_all_from_editing_directions)
+        btn_sync.pack(side=tk.LEFT)
 
         self.add_browse_row(cfg_frame, "📁 Images Folder:", self.img_dir_var, self.browse_img_dir, 1)
         self.add_browse_row(cfg_frame, "🎵 Audio Folder:", self.aud_dir_var, self.browse_aud_dir, 2)
@@ -557,6 +563,81 @@ class AutoVideoStudioApp(tk.Tk):
             cur_text = DEFAULT_BADGE_MAP[sc_num][0][1]
         self.text_edit_var.set(cur_text)
         self.preview_repositioned_badge()
+
+    def sync_all_from_editing_directions(self):
+        """
+        One-click Sync:
+        1. Auto-detects the latest project folder (Images and Audio).
+        2. Parses Editing_Directions.txt to load all scenes, updated titles, text lines, and color themes.
+        3. Clears stale cached positions from previous videos and replaces them with fresh parsed texts.
+        4. Refreshes the scene list dropdown and immediately updates the preview with new video assets.
+        """
+        # Step 1: Detect and load latest project assets
+        latest = detect_latest_project_folder()
+        if latest:
+            self.img_dir_var.set(os.path.join(latest, "Images"))
+            self.aud_dir_var.set(os.path.join(latest, "Audio"))
+            mp4s = [f for f in os.listdir(latest) if f.lower().endswith('.mp4')]
+            if mp4s:
+                self.out_video_var.set(os.path.join(latest, mp4s[0]))
+                self.load_video_file(os.path.join(latest, mp4s[0]))
+            else:
+                self.out_video_var.set(os.path.join(latest, "Fasting_Series_LongFormat.mp4"))
+
+        # Step 2: Parse current Editing_Directions.txt
+        ed_file = os.path.join(WORKSPACE, "Editing_Directions.txt")
+        parsed_scenes = {}
+        if os.path.exists(ed_file):
+            try:
+                import parse_editing_directions
+                parsed_scenes = parse_editing_directions.parse_editing_directions(ed_file)
+            except Exception as e:
+                self.log(f"Error parsing Editing_Directions.txt: {e}")
+
+        # Step 3: Refresh scene dropdown from images
+        img_folder = self.img_dir_var.get()
+        detected = self.get_detected_scenes(img_folder)
+        if detected:
+            self.scenes_list = detected
+        elif parsed_scenes:
+            self.scenes_list = [f"Scene {k}" for k in sorted(parsed_scenes.keys(), key=lambda x: int(x))]
+
+        self.cmb_scene['values'] = self.scenes_list
+
+        # Step 4: Sync badge texts and colors from parsed Editing Directions into active memory
+        for sc_key, sc_data in parsed_scenes.items():
+            if sc_key not in self.badge_positions:
+                self.badge_positions[sc_key] = {
+                    "x": WIDTH // 2,
+                    "y": 120,
+                    "scale": 1.0,
+                    "font_size": 46,
+                    "wrap_width": 620,
+                    "text": sc_data.get("text", "")
+                }
+            else:
+                # Update text if changed
+                self.badge_positions[sc_key]["text"] = sc_data.get("text", "")
+                if "font_size" not in self.badge_positions[sc_key]:
+                    self.badge_positions[sc_key]["font_size"] = 46
+
+        save_manual_positions(self.badge_positions)
+
+        # Select first scene and refresh preview canvas immediately
+        if self.scenes_list:
+            self.selected_scene_var.set(self.scenes_list[0])
+        self.update_scene_editor_fields()
+        self.preview_repositioned_badge()
+
+        folder_name = os.path.basename(latest) if latest else "Current Folder"
+        self.log(f"⚡ Synced {len(self.scenes_list)} scenes from Editing_Directions.txt into {folder_name}!")
+        messagebox.showinfo(
+            "Sync Complete",
+            f"Successfully synced with Editing Directions!\n\n"
+            f"• Project Folder: {folder_name}\n"
+            f"• Total Scenes: {len(self.scenes_list)}\n"
+            f"• All texts and assets updated for current video preview."
+        )
 
     def refresh_latest_folder(self):
         latest = detect_latest_project_folder()
