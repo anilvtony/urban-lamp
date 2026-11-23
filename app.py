@@ -302,6 +302,7 @@ class AutoVideoStudioApp(tk.Tk):
         self.x_pos_var = tk.IntVar(value=960)
         self.y_pos_var = tk.IntVar(value=120)
         self.scale_var = tk.DoubleVar(value=1.0)
+        self.font_size_var = tk.IntVar(value=46)
         self.text_edit_var = tk.StringVar(value="")
 
         # Video Player state
@@ -406,15 +407,23 @@ class AutoVideoStudioApp(tk.Tk):
         self.lbl_x_val = tk.Label(row_x, text="960px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 9, "bold"), width=6)
         self.lbl_x_val.pack(side=tk.LEFT)
 
-        # Row 5: Size / Scale Slider & Action Buttons
+        # Row 5: Size / Scale Slider & Font Size
         row4 = tk.Frame(pos_box, bg="#1E293B")
         row4.pack(fill=tk.X, pady=2)
-        lbl_sz = tk.Label(row4, text="Size (Decrease/Scale):", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=16, anchor=tk.W)
+        lbl_sz = tk.Label(row4, text="Scale (%):", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=10, anchor=tk.W)
         lbl_sz.pack(side=tk.LEFT)
-        self.scale_slider = ttk.Scale(row4, from_=0.4, to=1.4, variable=self.scale_var, command=self.on_scale_slider_moved)
+        self.scale_slider = ttk.Scale(row4, from_=0.4, to=1.6, variable=self.scale_var, command=self.on_scale_slider_moved)
         self.scale_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
-        self.lbl_scale_val = tk.Label(row4, text="100%", bg="#1E293B", fg="#F59E0B", font=("Consolas", 9, "bold"), width=6)
-        self.lbl_scale_val.pack(side=tk.LEFT)
+        self.lbl_scale_val = tk.Label(row4, text="100%", bg="#1E293B", fg="#F59E0B", font=("Consolas", 9, "bold"), width=5)
+        self.lbl_scale_val.pack(side=tk.LEFT, padx=(0, 6))
+
+        # Font Size Slider
+        lbl_fsize = tk.Label(row4, text="Font Size:", bg="#1E293B", fg="#94A3B8", font=("Segoe UI", 8), width=8, anchor=tk.W)
+        lbl_fsize.pack(side=tk.LEFT)
+        self.fsize_slider = ttk.Scale(row4, from_=32, to=72, variable=self.font_size_var, command=self.on_fsize_slider_moved)
+        self.fsize_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=4)
+        self.lbl_fsize_val = tk.Label(row4, text="46px", bg="#1E293B", fg="#38BDF8", font=("Consolas", 9, "bold"), width=5)
+        self.lbl_fsize_val.pack(side=tk.LEFT)
 
         # Action Buttons: Save Current Scene & Save ALL Scenes At Once
         row_btns = tk.Frame(pos_box, bg="#1E293B")
@@ -538,6 +547,11 @@ class AutoVideoStudioApp(tk.Tk):
             self.lbl_wrap_val.config(text=f"{wrap_val if wrap_val else 620}px")
             self.enable_wrap_var.set(bool(wrap_val > 0))
 
+        fsize_val = data.get("font_size", 46)
+        if hasattr(self, 'font_size_var'):
+            self.font_size_var.set(fsize_val if fsize_val else 46)
+            self.lbl_fsize_val.config(text=f"{fsize_val if fsize_val else 46}px")
+
         cur_text = data.get("text", "")
         if not cur_text and sc_num in DEFAULT_BADGE_MAP:
             cur_text = DEFAULT_BADGE_MAP[sc_num][0][1]
@@ -632,6 +646,11 @@ class AutoVideoStudioApp(tk.Tk):
         self.lbl_wrap_val.config(text=f"{w_val}px")
         self.preview_repositioned_badge()
 
+    def on_fsize_slider_moved(self, val):
+        fs_val = int(float(val))
+        self.lbl_fsize_val.config(text=f"{fs_val}px")
+        self.preview_repositioned_badge()
+
     def on_wrap_toggled(self):
         self.preview_repositioned_badge()
 
@@ -647,8 +666,9 @@ class AutoVideoStudioApp(tk.Tk):
         new_y = self.y_pos_var.get()
         new_scale = round(self.scale_var.get(), 2)
         new_text = self.text_edit_var.get().strip()
+        fsize = self.font_size_var.get() if hasattr(self, 'font_size_var') else 46
 
-        # Update disk badge PNG in pure white background with text wrapping
+        # Update disk badge PNG with text wrapping and font size
         bname = f"p2_b{sc_num}.png"
         wrap_w = self.wrap_width_var.get() if (hasattr(self, 'enable_wrap_var') and self.enable_wrap_var.get()) else 0
 
@@ -663,15 +683,15 @@ class AutoVideoStudioApp(tk.Tk):
                 sc_int = 1
             bg_col = "#EADBC8" if (sc_int % 2 != 0) else "#FAF8F5"
 
-            if new_text != orig_txt or not os.path.exists(os.path.join(BADGE_DIR, bname)) or wrap_w > 0:
-                self.log(f"Rendering high-precision badge image for {sc_str}: '{new_text}' (BG={bg_col}, Wrap={wrap_w}px)")
-                render_single_badge_to_disk(new_text, bg=bg_col, txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67", fsize=44, strike=False, out_filename=bname, overwrite=True, wrap_width=wrap_w)
-                self.preview_repositioned_badge()
+            self.log(f"Rendering high-precision badge image for {sc_str}: '{new_text}' (BG={bg_col}, Font={fsize}px, Wrap={wrap_w}px)")
+            render_single_badge_to_disk(new_text, bg=bg_col, txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67", fsize=fsize, strike=False, out_filename=bname, overwrite=True, wrap_width=wrap_w)
+            self.preview_repositioned_badge()
 
         self.badge_positions[sc_num] = {
             "x": new_x,
             "y": new_y,
             "scale": new_scale,
+            "font_size": fsize,
             "text": new_text,
             "wrap_width": wrap_w
         }
@@ -713,7 +733,17 @@ class AutoVideoStudioApp(tk.Tk):
         nw, nh = int(w * scale), int(h * scale)
         im_res = im.resize((nw, nh), Image.LANCZOS).crop(((nw-WIDTH)//2, (nh-HEIGHT)//2, (nw-WIDTH)//2+WIDTH, (nh-HEIGHT)//2+HEIGHT))
 
-        # Priority 1: Load pre-rendered high-quality badge from disk (rendered via Edge with 100% accurate HarfBuzz Telugu guninthalu)
+        cur_text = self.text_edit_var.get().strip() if hasattr(self, 'text_edit_var') else ""
+        wrap_w = self.wrap_width_var.get() if (hasattr(self, 'enable_wrap_var') and self.enable_wrap_var.get()) else 0
+        fsize = self.font_size_var.get() if hasattr(self, 'font_size_var') else 46
+        try:
+            sc_int = int(sc_num)
+        except Exception:
+            sc_int = 1
+        bg_col = "#EADBC8" if (sc_int % 2 != 0) else "#FAF8F5"
+
+        b_im = None
+        # Check if disk badge exists
         candidates = [f"p2_b{sc_num}.png", f"b{sc_num}.png"]
         bpath = None
         for cand in candidates:
@@ -721,25 +751,21 @@ class AutoVideoStudioApp(tk.Tk):
             if os.path.exists(p):
                 bpath = p
                 break
-        
-        b_im = None
-        if bpath and os.path.exists(bpath):
+
+        # If disk badge exists, check if user modified text or wrap width
+        orig_txt = DEFAULT_BADGE_MAP.get(str(sc_num), [(None, "")])[0][1]
+        text_changed = (cur_text and cur_text != orig_txt)
+        wrap_active = (wrap_w > 0 and wrap_w < 850)
+
+        if bpath and os.path.exists(bpath) and not text_changed and not wrap_active:
             try:
                 b_im = Image.open(bpath).convert('RGBA')
             except Exception:
                 b_im = None
 
-        # Fallback if no disk badge exists: generate dynamically
-        if b_im is None:
-            cur_text = self.text_edit_var.get().strip()
-            wrap_w = self.wrap_width_var.get() if (hasattr(self, 'enable_wrap_var') and self.enable_wrap_var.get()) else 0
-            if cur_text:
-                try:
-                    sc_int = int(sc_num)
-                except Exception:
-                    sc_int = 1
-                bg_col = "#EADBC8" if (sc_int % 2 != 0) else "#FAF8F5"
-                b_im = render_dynamic_preview_badge(cur_text, wrap_width=wrap_w, bg=bg_col, txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67")
+        # If text changed, wrap active, or no disk badge: render dynamically using wrap & font size
+        if b_im is None and cur_text:
+            b_im = render_dynamic_preview_badge(cur_text, wrap_width=wrap_w, fsize=fsize, bg=bg_col, txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67")
 
         if b_im is not None:
             # Apply scale if modified
