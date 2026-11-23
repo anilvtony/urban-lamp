@@ -34,28 +34,56 @@ def render_dynamic_preview_badge(text, wrap_width=620, fsize=44, bg='#FFFFFF', t
     except Exception:
         font = ImageFont.load_default()
 
+    # Font specifically for Unicode symbols like arrows (→, ←, etc.) that NotoSansTelugu lacks
+    arrow_font = None
+    for sys_font in ['C:/Windows/Fonts/segoeui.ttf', 'C:/Windows/Fonts/arial.ttf', 'C:/Windows/Fonts/seguisym.ttf']:
+        if os.path.exists(sys_font):
+            try:
+                arrow_font = ImageFont.truetype(sys_font, fsize)
+                break
+            except Exception:
+                pass
+    if arrow_font is None:
+        arrow_font = font
+
+    def get_token_w(token):
+        if any(c in '→←↑↓↔↕' for c in token):
+            return arrow_font.getbbox(token)[2] - arrow_font.getbbox(token)[0]
+        return font.getbbox(token)[2] - font.getbbox(token)[0]
+
     words = text.split()
     lines = []
-    cur = ''
-    for w in words:
-        cand = (cur + ' ' + w).strip()
-        bb = font.getbbox(cand)
-        cand_w = bb[2] - bb[0]
-        if wrap_width and cand_w > wrap_width and cur:
-            lines.append(cur)
-            cur = w
-        else:
-            cur = cand
-    if cur:
-        lines.append(cur)
+    cur_tokens = []
+    cur_w = 0
+    space_w = font.getbbox(' ')[2] - font.getbbox(' ')[0]
 
-    line_bboxes = [font.getbbox(line) for line in lines]
-    line_widths = [b[2] - b[0] for b in line_bboxes]
-    line_heights = [b[3] - b[1] for b in line_bboxes]
-    
-    max_w = max(line_widths) if line_widths else 100
-    line_h = max(line_heights) if line_heights else fsize
-    spacing = int(fsize * 0.3)
+    for w in words:
+        tw = get_token_w(w)
+        cand_w = tw if not cur_tokens else (cur_w + space_w + tw)
+        if wrap_width and cand_w > wrap_width and cur_tokens:
+            lines.append(cur_tokens)
+            cur_tokens = [w]
+            cur_w = tw
+        else:
+            cur_tokens.append(w)
+            cur_w = cand_w
+    if cur_tokens:
+        lines.append(cur_tokens)
+
+    # Calculate dimensions
+    line_metrics = []
+    for line_tokens in lines:
+        lw = sum(get_token_w(t) for t in line_tokens) + max(0, len(line_tokens) - 1) * space_w
+        lh = fsize
+        for t in line_tokens:
+            use_f = arrow_font if any(c in '→←↑↓↔↕' for c in t) else font
+            bb = use_f.getbbox(t)
+            lh = max(lh, bb[3] - bb[1])
+        line_metrics.append((lw, lh))
+
+    max_w = max([m[0] for m in line_metrics]) if line_metrics else 100
+    line_h = max([m[1] for m in line_metrics]) if line_metrics else fsize
+    spacing = int(fsize * 0.35)
     total_text_h = len(lines) * line_h + (len(lines) - 1) * spacing
 
     pad_x = 36
@@ -81,10 +109,13 @@ def render_dynamic_preview_badge(text, wrap_width=620, fsize=44, bg='#FFFFFF', t
     draw.rounded_rectangle([bx0, by0, bx0 + box_w, by0 + box_h], radius=radius, fill=bg, outline=border_col, width=border_w)
 
     cur_y = by0 + pad_y
-    for i, line in enumerate(lines):
-        lw = line_widths[i]
-        lx = bx0 + (box_w - lw) // 2
-        draw.text((lx, cur_y), line, font=font, fill=txt_col)
+    for i, line_tokens in enumerate(lines):
+        lw = line_metrics[i][0]
+        cur_x = bx0 + (box_w - lw) // 2
+        for t in line_tokens:
+            use_f = arrow_font if any(c in '→←↑↓↔↕' for c in t) else font
+            draw.text((cur_x, cur_y), t, font=use_f, fill=txt_col)
+            cur_x += get_token_w(t) + space_w
         cur_y += line_h + spacing
 
     bbox = im.getbbox()
