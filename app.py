@@ -833,18 +833,14 @@ class AutoVideoStudioApp(tk.Tk):
                 bpath = p
                 break
 
-        # If disk badge exists, check if user modified text or wrap width
-        orig_txt = DEFAULT_BADGE_MAP.get(str(sc_num), [(None, "")])[0][1]
-        text_changed = (cur_text and cur_text != orig_txt)
-        wrap_active = (wrap_w > 0 and wrap_w < 850)
-
-        if bpath and os.path.exists(bpath) and not text_changed and not wrap_active:
+        # Priority: Load Edge-rendered badge with 100% accurate HarfBuzz Telugu guninthalu and Unicode arrows
+        if bpath and os.path.exists(bpath):
             try:
                 b_im = Image.open(bpath).convert('RGBA')
             except Exception:
                 b_im = None
 
-        # If text changed, wrap active, or no disk badge: render dynamically using wrap & font size
+        # Fallback if no disk badge exists: generate dynamically
         if b_im is None and cur_text:
             b_im = render_dynamic_preview_badge(cur_text, wrap_width=wrap_w, fsize=fsize, bg=bg_col, txt_col="#2B3A67", border_col="#2B3A67", shadow_col="#2B3A67")
 
