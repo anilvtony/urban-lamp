@@ -29,19 +29,21 @@ import numpy as np
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 
 def render_dynamic_preview_badge(text, wrap_width=620, fsize=44, bg='#FFFFFF', txt_col='#2B3A67', border_col='#2B3A67', shadow_col='#2B3A67'):
-    # Telugu Font
+    # Authentic Telugu Font: Gautami Bold (standard Windows Telugu font with authentic curves) or Noto
     font_tel = None
-    for f_cand in ['NotoSansTelugu-Full.ttf', 'NotoSansTelugu-Bold.ttf']:
+    # Scale up Telugu point size by ~20% so its glyph body height matches Latin/English capital height
+    tel_fsize = int(fsize * 1.20)
+    for f_cand in ['C:/Windows/Fonts/gautamib.ttf', 'C:/Windows/Fonts/gautami.ttf', 'NotoSansTelugu-Full.ttf', 'NotoSansTelugu-Bold.ttf']:
         if os.path.exists(f_cand):
             try:
-                font_tel = ImageFont.truetype(f_cand, fsize)
+                font_tel = ImageFont.truetype(f_cand, tel_fsize)
                 break
             except Exception:
                 pass
     if font_tel is None:
         font_tel = ImageFont.load_default()
 
-    # English & Symbols Bold Font (Segoe UI Bold / Arial Bold / Montserrat ExtraBold)
+    # English & Symbols Bold Font (Montserrat ExtraBold / Segoe UI Bold / Arial Bold)
     font_eng = None
     for sys_font in ['Montserrat-ExtraBold.ttf', 'C:/Windows/Fonts/segoeuib.ttf', 'C:/Windows/Fonts/arialbd.ttf', 'C:/Windows/Fonts/segoeui.ttf']:
         if os.path.exists(sys_font):
