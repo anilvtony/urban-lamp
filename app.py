@@ -29,14 +29,21 @@ import numpy as np
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 
 def render_dynamic_preview_badge(text, wrap_width=620, fsize=44, bg='#FFFFFF', txt_col='#2B3A67', border_col='#2B3A67', shadow_col='#2B3A67'):
-    try:
-        font = ImageFont.truetype('NotoSansTelugu-Full.ttf', fsize)
-    except Exception:
+    # Prioritize ExtraBold font files for punchy text
+    font = None
+    for f_cand in ['NotoSansTelugu-ExtraBold.ttf', 'NotoSansTelugu-Bold.ttf', 'NotoSansTelugu-Full.ttf']:
+        if os.path.exists(f_cand):
+            try:
+                font = ImageFont.truetype(f_cand, fsize)
+                break
+            except Exception:
+                pass
+    if font is None:
         font = ImageFont.load_default()
 
-    # Font specifically for Unicode symbols like arrows (→, ←, etc.) that NotoSansTelugu lacks
+    # Font specifically for Unicode symbols like arrows (→, ←, etc.) and English bold text
     arrow_font = None
-    for sys_font in ['C:/Windows/Fonts/segoeui.ttf', 'C:/Windows/Fonts/arial.ttf', 'C:/Windows/Fonts/seguisym.ttf']:
+    for sys_font in ['C:/Windows/Fonts/segoeuib.ttf', 'C:/Windows/Fonts/segoeui.ttf', 'C:/Windows/Fonts/arialbd.ttf', 'C:/Windows/Fonts/arial.ttf']:
         if os.path.exists(sys_font):
             try:
                 arrow_font = ImageFont.truetype(sys_font, fsize)

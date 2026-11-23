@@ -95,8 +95,8 @@ def render_single_badge_to_disk(text, bg="#FFFFFF", txt_col="#1B2A4A", border_co
 <style>
 @font-face {{
     font-family: 'Noto Sans Telugu';
-    src: url('NotoSansTelugu-Full.ttf') format('truetype');
-    font-weight: 700 800;
+    src: url('NotoSansTelugu-ExtraBold.ttf') format('truetype'), url('NotoSansTelugu-Bold.ttf') format('truetype'), url('NotoSansTelugu-Full.ttf') format('truetype');
+    font-weight: 700 800 900;
 }}
 @font-face {{
     font-family: 'Montserrat';
