@@ -29,40 +29,50 @@ import numpy as np
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 
 def render_dynamic_preview_badge(text, wrap_width=620, fsize=44, bg='#FFFFFF', txt_col='#2B3A67', border_col='#2B3A67', shadow_col='#2B3A67'):
-    # Prioritize ExtraBold font files for punchy text
-    font = None
-    for f_cand in ['NotoSansTelugu-ExtraBold.ttf', 'NotoSansTelugu-Bold.ttf', 'NotoSansTelugu-Full.ttf']:
+    # Telugu Font
+    font_tel = None
+    for f_cand in ['NotoSansTelugu-Full.ttf', 'NotoSansTelugu-Bold.ttf']:
         if os.path.exists(f_cand):
             try:
-                font = ImageFont.truetype(f_cand, fsize)
+                font_tel = ImageFont.truetype(f_cand, fsize)
                 break
             except Exception:
                 pass
-    if font is None:
-        font = ImageFont.load_default()
+    if font_tel is None:
+        font_tel = ImageFont.load_default()
 
-    # Font specifically for Unicode symbols like arrows (→, ←, etc.) and English bold text
-    arrow_font = None
-    for sys_font in ['C:/Windows/Fonts/segoeuib.ttf', 'C:/Windows/Fonts/segoeui.ttf', 'C:/Windows/Fonts/arialbd.ttf', 'C:/Windows/Fonts/arial.ttf']:
+    # English & Symbols Bold Font (Segoe UI Bold / Arial Bold / Montserrat ExtraBold)
+    font_eng = None
+    for sys_font in ['Montserrat-ExtraBold.ttf', 'C:/Windows/Fonts/segoeuib.ttf', 'C:/Windows/Fonts/arialbd.ttf', 'C:/Windows/Fonts/segoeui.ttf']:
         if os.path.exists(sys_font):
             try:
-                arrow_font = ImageFont.truetype(sys_font, fsize)
+                font_eng = ImageFont.truetype(sys_font, fsize)
                 break
             except Exception:
                 pass
-    if arrow_font is None:
-        arrow_font = font
+    if font_eng is None:
+        font_eng = font_tel
+
+    def get_chunk_font(chunk):
+        # If chunk contains Telugu characters (0x0C00 - 0x0C7F), use Telugu font
+        if any(0x0C00 <= ord(c) <= 0x0C7F for c in chunk):
+            return font_tel, True
+        return font_eng, False
 
     def get_token_w(token):
-        if any(c in '→←↑↓↔↕' for c in token):
-            return arrow_font.getbbox(token)[2] - arrow_font.getbbox(token)[0]
-        return font.getbbox(token)[2] - font.getbbox(token)[0]
+        chunks = [c for c in re.split(r'([\u0c00-\u0c7f]+|[^\u0c00-\u0c7f]+)', token) if c]
+        total_w = 0
+        for ch in chunks:
+            f, _ = get_chunk_font(ch)
+            bb = f.getbbox(ch)
+            total_w += (bb[2] - bb[0])
+        return total_w
 
     words = text.split()
     lines = []
     cur_tokens = []
     cur_w = 0
-    space_w = font.getbbox(' ')[2] - font.getbbox(' ')[0]
+    space_w = font_eng.getbbox(' ')[2] - font_eng.getbbox(' ')[0]
 
     for w in words:
         tw = get_token_w(w)
@@ -83,9 +93,11 @@ def render_dynamic_preview_badge(text, wrap_width=620, fsize=44, bg='#FFFFFF', t
         lw = sum(get_token_w(t) for t in line_tokens) + max(0, len(line_tokens) - 1) * space_w
         lh = fsize
         for t in line_tokens:
-            use_f = arrow_font if any(c in '→←↑↓↔↕' for c in t) else font
-            bb = use_f.getbbox(t)
-            lh = max(lh, bb[3] - bb[1])
+            chunks = [c for c in re.split(r'([\u0c00-\u0c7f]+|[^\u0c00-\u0c7f]+)', t) if c]
+            for ch in chunks:
+                f, _ = get_chunk_font(ch)
+                bb = f.getbbox(ch)
+                lh = max(lh, bb[3] - bb[1])
         line_metrics.append((lw, lh))
 
     max_w = max([m[0] for m in line_metrics]) if line_metrics else 100
@@ -120,9 +132,14 @@ def render_dynamic_preview_badge(text, wrap_width=620, fsize=44, bg='#FFFFFF', t
         lw = line_metrics[i][0]
         cur_x = bx0 + (box_w - lw) // 2
         for t in line_tokens:
-            use_f = arrow_font if any(c in '→←↑↓↔↕' for c in t) else font
-            draw.text((cur_x, cur_y), t, font=use_f, fill=txt_col)
-            cur_x += get_token_w(t) + space_w
+            chunks = [c for c in re.split(r'([\u0c00-\u0c7f]+|[^\u0c00-\u0c7f]+)', t) if c]
+            for ch in chunks:
+                f, is_tel = get_chunk_font(ch)
+                st_w = 1 if is_tel else 0
+                draw.text((cur_x, cur_y), ch, font=f, fill=txt_col, stroke_width=st_w, stroke_fill=txt_col)
+                bb = f.getbbox(ch)
+                cur_x += (bb[2] - bb[0])
+            cur_x += space_w
         cur_y += line_h + spacing
 
     bbox = im.getbbox()
