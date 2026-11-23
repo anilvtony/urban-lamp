@@ -890,24 +890,14 @@ class AutoVideoStudioApp(tk.Tk):
                 bpath = p
                 break
 
-        # Load badge image:
-        # If user enabled wrap (< 850px) or modified text, generate wrapped badge on-the-fly with authentic styling.
-        # Otherwise, load pre-rendered Edge badge from disk.
-        is_wrap_active = (wrap_w > 0 and wrap_w < 850)
-        
-        # Look up colors from parsed editing directions or default palette
-        txt_col = "#2B2D6E" if (sc_int % 2 != 0) else "#7A1F3D"
-        border_col = "#141414"
-        shadow_col = "#7A1F3D" if (sc_int % 2 != 0) else "#2B2D6E"
-
-        if is_wrap_active and cur_text:
-            b_im = render_dynamic_preview_badge(cur_text, wrap_width=wrap_w, fsize=fsize, bg=bg_col, txt_col=txt_col, border_col=border_col, shadow_col=shadow_col)
-        elif bpath and os.path.exists(bpath):
+        # Priority: ALWAYS load pre-rendered Edge badge from disk for 100% accurate HarfBuzz Telugu guninthalu & ligatures
+        if bpath and os.path.exists(bpath):
             try:
                 b_im = Image.open(bpath).convert('RGBA')
             except Exception:
                 b_im = None
 
+        # Fallback only if no pre-rendered disk badge exists
         if b_im is None and cur_text:
             b_im = render_dynamic_preview_badge(cur_text, wrap_width=wrap_w, fsize=fsize, bg=bg_col, txt_col=txt_col, border_col=border_col, shadow_col=shadow_col)
 
